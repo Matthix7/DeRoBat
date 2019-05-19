@@ -1,0 +1,122 @@
+
+                         NEW SOFTWARE RELEASE
+                         ====================
+
+
+Products involved: AXIS IP Utility
+
+Release date:      May 16, 2016
+
+Release type:      Production
+
+Software version:  4.04.0
+
+File name(s):      IPUtility.exe
+
+Supported OS:      Microsoft Windows XP, 2003 Server, Vista, Windows 7, Windows 8
+                   and Windows 10.
+
+Preceding release: 4.03.0
+
+--------------------------------------------------------------------------------
+
+
+INSTALLATION INSTRUCTIONS
+=========================
+
+No installation is required, just download and run the application.
+
+--------------------------------------------------------------------------------
+RELEASE 4.04.0.0
+================
+Added support for "AXIS Companion Recorder"
+
+RELEASE 4.03.0.0
+================
+Fixed an error that could cause the GUI to become slow when searching for cameras.
+
+RELEASE 4.02.0.0
+================
+Fixed an with the icons (black icon) in the menue when running different Windows language than English.
+
+RELEASE 4.01.0.0
+================
+Fixed an occational error when setting the ipaddress.
+
+
+RELEASE 4.00.0.0
+================
+
+New features
+============
+Possibility to set IP address, Subnet Mask and Default Router without having to restart device.
+Updated the GUI.
+Possibility to run even when not administrator on the computer. Certain functions however will require a restart using administrative rights.
+Other minor bugg fixes.
+
+
+
+
+
+RELEASE 2.21.0.4
+================
+
+New features
+============
+
+F01	Microsoft Windows Vista support
+	Any Windows Vista user can use IP Utility to discover Axis devices on
+        the network, but only administrators are allowed to assign IP addresses.
+
+Known limitations
+=================
+
+L01     Situation: A computer with Windows Vista does not discover any cameras.
+        Solution: IP Utility must once be run with administrator rights. Follow these
+        steps:
+          1. right click IPUtility.exe
+          2. select "Run as administrator"
+          3. close IP Utility
+        From now on there is no need to run IP Utility as an administrator anymore.
+
+
+RELEASE 2.20.0.8
+================
+
+New features
+============
+
+F01	IPv6 Support
+	AXIS IP Utility is now able to discover Axis devices with IPv6 addresses
+	on the network.
+
+
+Modifications
+=============
+
+M01	An unsuccessful IP assignment will time out after 10 minutes instead
+	of 20.
+
+M02	Added the possibility to cancel an ongoing IP assignment.
+
+M03	The graphical user interface has been updated.
+
+
+Corrections since 2.1.2.1
+=========================
+
+C01	
+  
+
+Known limitations
+=================
+
+L01	Situation: A computer with two network adapters. IPv4 and IPv6 protocols
+	are installed and enabled on both interfaces. The two networks are combined
+	IPv4/IPv6 networks.
+	Description: If there exist Axis devices with only IPv6 enabled
+	(IPv4 disabled) on both networks, only the ones on one of the networks will
+	be discovered using IP Utility.
+
+L02     The Windows Vista elevation prompt may be displayed even though the user
+        has canceled the IP assignment.
