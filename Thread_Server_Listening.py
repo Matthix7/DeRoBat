@@ -89,14 +89,14 @@ class Listening_Server(Thread):
 #                print("Reçu Client {}".format(msg_recu))
                 
                 if msg_recu != '' and self.verrou.acquire(blocking = False):
-                    print("entree listening")
+#                    print("entree listening")
                     
                     self.file = open(self.filename, 'a')
                     self.file.write(str(msg_recu)+"\n")
                     self.file.close()
                     
                     self.verrou.release()
-                    print("sortie listening")
+#                    print("sortie listening")
                 
                 if eval(msg_recu)[0] == 999:
                     self.alive.clear()

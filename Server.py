@@ -52,7 +52,7 @@ while alive.is_set():
     if X != []:
         #Représentation 3D en 2D
 #        plt.scatter(X, Y, c = Z, cmap='viridis')
-        ax.scatter(X, Y, Z, cmap='viridis')
+        ax.scatter3D(X, Y, Z, c=Z, cmap='viridis')
         plt.pause(2)
 
 
