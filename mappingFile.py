@@ -43,7 +43,7 @@ class Map(Thread):
         return self.mapLock, self.Xcopy, self.Ycopy, self.Zcopy
     
     def run(self):
-        
+                
         # On se synchronise avec listening
         while self.alive.isSet():
             measures = []
@@ -52,7 +52,7 @@ class Map(Thread):
             # On peut lire si listening n'est pas en train d'écrire
             #On commence par compter le nombre de lignes du fichier de mesures
             if self.verrou.acquire(blocking = False):
-                print("entree map1")
+#                print("entree map1")
                 measureFile = open(self.filename, 'r')
                 
                 for i, ligne in enumerate(measureFile):
@@ -61,7 +61,7 @@ class Map(Thread):
                 
                 measureFile.close()
                 self.verrou.release()
-                print("sortie map1")
+#                print("sortie map1")
                 time.sleep(1)
                 
                 
@@ -70,7 +70,7 @@ class Map(Thread):
                 
                 if self.verrou.acquire(blocking = True):
                 
-                    print("entree map2")
+#                    print("entree map2")
                     measureFile = open(self.filename, 'r')
                    
                     for i, ligne in enumerate(measureFile):
@@ -79,7 +79,7 @@ class Map(Thread):
                     
                     measureFile.close()
                     self.verrou.release()
-                    print("sortie map2")
+#                    print("sortie map2")
                 
                 #Copie dans un autre fichier, exploitable sans risque de pertes.
 #                self.test = open("testFile.txt", 'a')
@@ -91,10 +91,16 @@ class Map(Thread):
                     mes = eval(line)
                     x, y, cap, sonde, angle_sonde = mes[0], mes[1], mes[2], mes[3], 2*pi*mes[4]/360
                     
-                    if sonde != -1.0:
-                        self.X.append(x+sin(cap)*sonde*sin(angle_sonde))
-                        self.Y.append(y-cos(cap)*sonde*sin(angle_sonde))
-                        self.Z.append(-sonde*cos(angle_sonde)) #cos(pi ± angle_sonde) plus vraisemblablement
+                    angle_sonde = pi/2 + angle_sonde
+                    xPoint = x+sin(cap)*sonde*sin(angle_sonde)
+                    yPoint = y-cos(cap)*sonde*sin(angle_sonde)
+                    zPoint = sonde*cos(angle_sonde)
+                    
+                    if sonde > 0.3:# and x >0 and y>0 and xPoint>0 and xPoint<4 and yPoint>0 and yPoint<3 and zPoint<=0:
+                        
+                        self.X.append(xPoint)
+                        self.Y.append(yPoint)
+                        self.Z.append(zPoint) #cos(pi ± angle_sonde) plus vraisemblablement
                     
                 self.Xcopy, self.Ycopy, self.Zcopy = self.X, self.Y, self.Z
 #                self.test.close()

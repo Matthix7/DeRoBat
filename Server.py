@@ -15,15 +15,13 @@ Si mode caméra:
     Appuyer sur Echap pour quitter la fenêtre 'Webcam', ce qui entraîne les fermetures de socket.
 """
 
-import socket
-import sys
 from threading import Thread, RLock, Event
 from Thread_Server_Listening import *
 from Thread_Server_Writing import *
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-import time
 
+import numpy as np
 
 PORT_ALLER = 12800
 PORT_RETOUR = 12801
@@ -45,6 +43,9 @@ ax = plt.axes(projection='3d')
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Z')
+ax.set_xlim(0,4)
+ax.set_ylim(0,3)
+ax.set_zlim(-3,3)
 
 while alive.is_set():
     X, Y, Z = thread_listening.toMap()
@@ -52,7 +53,8 @@ while alive.is_set():
     if X != []:
         #Représentation 3D en 2D
 #        plt.scatter(X, Y, c = Z, cmap='viridis')
-        ax.scatter(X, Y, Z, cmap='viridis')
+    
+        ax.scatter3D(X, Y, Z, c=np.linspace(-3,0,num = len(X)), cmap='viridis')
         plt.pause(2)
 
 
