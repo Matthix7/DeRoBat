@@ -6,10 +6,10 @@ import cv2.fisheye as fisheye
 import math
 import time
 from threading import Thread
+from commande import commande
 
 
 bordBassin = dict() #pour la position des aruco sur le bord
-
 
 
 class Cam(Thread):
@@ -42,24 +42,35 @@ class Cam(Thread):
         cap1.open('http://root:1234@169.254.236.203/mjpg/video.mjpg')  #Check adresse avec IPUtility
         
         DIM, K, D = calibration.defineCalibrationParameters()
-            
+        
+        servo, moteur = 1090, 2000
+        
         print('Acquisition running.')
         while(cap1.isOpened()):
+            
             xBoat, yBoat,theta = run_one_step(cap1, DIM, K, D)
             
+            servo, moteur = commande(servo, moteur) #Pilotage au clavier
+            self.commande = (servo, moteur)  # Code Driss, servo & moteur
+            
+            
+            
+            
             if xBoat != None and yBoat != None:
-                print("X = ", xBoat * 4/2350, "Y = ", yBoat*3/2000, "theta =", theta)
-                self.commande = (0,0)  # Code Driss, servo & moteur
-                
+                print("X = ", xBoat * 4/2350, "Y = ", yBoat*3/2000, "theta =", theta)                
                 self.message = str( (xBoat * 4/2350, yBoat*3/2000, theta) + self.commande)
             
             if xBoat == None or yBoat == None:
                 self.message = str( (-1, -1, -1) + self.commande)
             
-            if cv2.waitKey(1) & 0xFF == ord('q') or cv2.waitKey(1) & 0xFF == 27: # q or echap to quit
+            print("Commande = ", self.commande)
+            
+            key = cv2.waitKey(1) & 0xFF
+            if key == 27: #  echap to quit
                 self.message = str((999,999,999,0,0))
                 self.is_dead = "dead"
                 break
+            
         print('Acquisition ended.')
         cap1.release()
         cv2.destroyAllWindows()

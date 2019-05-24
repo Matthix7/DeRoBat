@@ -96,7 +96,7 @@ class Map(Thread):
                     yPoint = y-cos(cap)*sonde*sin(angle_sonde)
                     zPoint = sonde*cos(angle_sonde)
                     
-                    if sonde > 0.3:# and x >0 and y>0 and xPoint>0 and xPoint<4 and yPoint>0 and yPoint<3 and zPoint<=0:
+                    if sonde > 0.3 and x >0 and y>0 and xPoint>0 and xPoint<4 and yPoint>0 and yPoint<3 and zPoint<=0:
                         
                         self.X.append(xPoint)
                         self.Y.append(yPoint)
