@@ -35,12 +35,13 @@ class Map(Thread):
 #        self.fig=plt.figure()
 #        plt.title("Représentation bathymétrique du bassin") 
         
+        self.xBoat, self.yBoat = 0, 0
         self.X, self.Y, self.Z = [], [], []
         self.Xcopy, self.Ycopy, self.Zcopy = [], [], []
         self.mapLock = False
     
     def toMap(self):
-        return self.mapLock, self.Xcopy, self.Ycopy, self.Zcopy
+        return self.mapLock, self.Xcopy, self.Ycopy, self.Zcopy, self.xBoat, self.yBoat
     
     def run(self):
                 
@@ -103,7 +104,8 @@ class Map(Thread):
                         self.Z.append(zPoint) #cos(pi ± angle_sonde) plus vraisemblablement
                     
                 self.Xcopy, self.Ycopy, self.Zcopy = self.X, self.Y, self.Z
-#                self.test.close()
+                self.xBoat, self.yBoat = x, y
+                
                 self.memoire = self.input_lines
                 self.mapLock = False
                 

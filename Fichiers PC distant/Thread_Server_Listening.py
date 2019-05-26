@@ -44,7 +44,7 @@ class Listening_Server(Thread):
         
         
     def toMap(self):
-        return self.X, self.Y, self.Z
+        return self.X, self.Y, self.Z, self.xBoat, self.yBoat
     
     
     def run(self):
@@ -103,9 +103,9 @@ class Listening_Server(Thread):
                 
                 sock_client.send(b"Client 5 / 5")
                 
-                mapLock, X, Y, Z = thread_map.toMap()
+                mapLock, X, Y, Z, xBoat, yBoat = thread_map.toMap()
                 if not mapLock:
-                    self.X, self.Y, self.Z = X, Y, Z
+                    self.X, self.Y, self.Z, self.xBoat, self.yBoat = X, Y, Z, xBoat, yBoat
                 
                     
     

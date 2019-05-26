@@ -55,7 +55,7 @@ plt.ylim(0,4)
 plt.gca().set_aspect('equal', adjustable = 'box')
 
 while alive.is_set():
-    X, Y, Z = thread_listening.toMap()
+    X, Y, Z, xBoat, yBoat = thread_listening.toMap()
     
     
     if X != []:
