@@ -58,6 +58,9 @@ plt.gca().set_aspect('equal', adjustable = 'box')
 plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
 ax.yaxis.tick_right()
 
+file = open("bathymetrie.txt","w") #to write in a file (final bathy representation, contourf)
+
+
 
 while alive.is_set():
     X, Y, Z, xBoat, yBoat = thread_listening.toMap()
@@ -80,13 +83,15 @@ while alive.is_set():
     
             scat = plt.scatter(y, x, marker = 'o', c=col)
             #fig.colorbar(scat, label="Z")
+            
+            file.write(str(x)+"\t"+str(y)+"\t"+str(z))
 
         
-        plt.pause(2)
+        plt.pause(0.1)
                  
     
 
 
-
+file.close()
 # Attend que les threads se terminent
 thread_listening.join()
