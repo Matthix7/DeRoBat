@@ -47,6 +47,8 @@ Z_tab = np.ones((4*reduc,3*reduc)) * -3
 
 fig = plt.figure()
 plt.title("Représentation théorique du bassin")
+ax = fig.add_subplot(111)
+
 #plt.colorbar(surf)
 
 plt.xlim(0,3)
@@ -54,6 +56,7 @@ plt.ylim(0,4)
 
 plt.gca().set_aspect('equal', adjustable = 'box')
 plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
+ax.yaxis.tick_right()
 
 
 while alive.is_set():
