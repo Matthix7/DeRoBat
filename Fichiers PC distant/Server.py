@@ -53,6 +53,8 @@ plt.xlim(0,3)
 plt.ylim(0,4)
 
 plt.gca().set_aspect('equal', adjustable = 'box')
+plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
+
 
 while alive.is_set():
     X, Y, Z, xBoat, yBoat = thread_listening.toMap()
