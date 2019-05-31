@@ -86,8 +86,8 @@ while alive.is_set():
             
             file.write(str(x)+"\t"+str(y)+"\t"+str(z))
 
-        
-        plt.pause(0.1)
+        plt.scatter(yBoat, xBoat, 'xred')
+        plt.pause(2)
                  
     
 

@@ -40,7 +40,7 @@ class Listening_Server(Thread):
         self.file.write("(x, y, cap, sonde, angle_sonde)\n")
         self.file.close()
         
-        self.X, self.Y, self.Z = [], [], []
+        self.X, self.Y, self.Z, self.xBoat, self.yBoat = [], [], [], 0, 0
         
         
     def toMap(self):

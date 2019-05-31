@@ -11,6 +11,12 @@ from commande import commande
 
 bordBassin = dict() #pour la position des aruco sur le bord
 
+############# #Check adresse avec IPUtility #################################
+#############################################################################
+#adressCam = 'http://root:1234@169.254.236.203/mjpg/video.mjpg'   #Pour Quentin
+adressCam = 'http://root:1234@169.254.236.203/mjpg/video.mjpg'   #Pour Matthieu
+#############################################################################
+#############################################################################
 
 class Cam(Thread):
     """Acquisition d'images et extraction de la pose du bateau."""
@@ -39,7 +45,7 @@ class Cam(Thread):
         cv2.namedWindow('Webcam', cv2.WINDOW_NORMAL)
 
         cap1 = cv2.VideoCapture()
-        cap1.open('http://root:1234@169.254.236.203/mjpg/video.mjpg')  #Check adresse avec IPUtility
+        cap1.open(adressCam) 
         
         DIM, K, D = calibration.defineCalibrationParameters()
         
@@ -74,7 +80,6 @@ class Cam(Thread):
         print('Acquisition ended.')
         cap1.release()
         cv2.destroyAllWindows()
-
 
 
 

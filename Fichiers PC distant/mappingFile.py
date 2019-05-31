@@ -28,12 +28,6 @@ class Map(Thread):
         self.memoire = 0
         self.input_lines = 0
         
-        self.test = open("testFile.txt", 'w')
-        self.test.write("(x, y, cap, sonde, angle_sonde)\n")
-        self.test.close()
-        
-#        self.fig=plt.figure()
-#        plt.title("Représentation bathymétrique du bassin") 
         
         self.xBoat, self.yBoat = 0, 0
         self.X, self.Y, self.Z = [], [], []
@@ -101,7 +95,7 @@ class Map(Thread):
                         
                         self.X.append(xPoint)
                         self.Y.append(yPoint)
-                        self.Z.append(zPoint) #cos(pi ± angle_sonde) plus vraisemblablement
+                        self.Z.append(zPoint)
                     
                 self.Xcopy, self.Ycopy, self.Zcopy = self.X, self.Y, self.Z
                 self.xBoat, self.yBoat = x, y
@@ -109,13 +103,6 @@ class Map(Thread):
                 self.memoire = self.input_lines
                 self.mapLock = False
                 
-                
-                
-                
-                
-#                # Représentation 3D
-#                plt.scatter(self.X, self.Y, c = self.Z)
-#                plt.pause(0.05)
                 
                 
                 
