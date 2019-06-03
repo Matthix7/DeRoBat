@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
+
+# =============================================================================
+# REGULATION EN SUIVI DE WAYPOINT
+# =============================================================================
+
 """
 Created on Fri May 31 18:20:05 2019
 
 @author: catam
 """
 
-from numpy import array, cos, sin, pi, ones, vstack
+from numpy import array, cos, sin, pi, ones, vstack, linspace
 from math import atan2
 import matplotlib.pyplot as plt
 from numpy.linalg import norm
@@ -23,11 +28,10 @@ dt = 0.5
 
 # =============================================================================
 # Consignes
-xTarget = 3
-yTarget = 3
+xTarget = 9
+yTarget = 9
 vTarget = 0.5
 
-w = array([[xTarget], [yTarget], [vTarget]])
 # =============================================================================
 
 # =============================================================================
@@ -114,14 +118,13 @@ def draw_boat(x, size = 0.1):
 
 plt.figure()
 
-a = array([[-1], [-1]])
-b = array([[9], [4]])
-w = array([[b[0]], [b[1]], [vTarget]])
-
-X = array([[a[0,0]], [a[0,0]], [0], [0.5], [0]])
+X = array([[0.5], [0.5], [0], [0.5], [0]])
 consignes = array([[0.], [0.]])
 
-
+a = array([[X[0,0]], [X[1,0]]])    
+b = array([[xTarget], [yTarget]])
+w = array([[b[0,0]], [b[1,0]], [vTarget]])
+    
 while ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
 
     plt.cla()
@@ -143,34 +146,6 @@ while ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
      
     plt.pause(dt)
     
-    
-a = b
-b = array([[-1], [9]])
-w = array([[b[0]], [b[1]], [vTarget]])
-
-
-
-while ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
-
-    plt.cla()
-    plt.xlim((-3, 10))
-    plt.ylim((-3, 10))
-    plt.gca().set_aspect('equal', adjustable='box')
-    plt.plot([a[0], b[0]], [a[1], b[1]])
-    
-    
-    dU = dCommande(X, w)
-    consignes += dt*dU
-    consignes[0, 0] = max(-angle_max, min(consignes[0] , angle_max))
-    
-    X = newX(X, consignes)
-     
-    
-    
-    draw_boat(X)
-     
-    plt.pause(dt)
-
 
 
 
