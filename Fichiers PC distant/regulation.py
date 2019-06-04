@@ -36,7 +36,8 @@ vTarget = 0.5
 
 # =============================================================================
 # Contraintes
-angle_max = pi/6
+angle_max = pi/12
+vmax = 1
 # =============================================================================
 
 # =============================================================================
@@ -58,6 +59,27 @@ def newX(X, u):
     return newX
 
 
+# =============================================================================
+# Fonction à appeler depuis le module PosRegul
+# =============================================================================
+
+def getCommande(X, a, b, vTarget, commande_precedente):
+    
+    consigne = getConsignes(X, a, b, vTarget)
+    dU = dCommande(X, consigne)
+    commande = commande_precedente + dt*dU
+    commande[0, 0] = max(-angle_max, min(commande[0,0] , angle_max))
+    commande[1, 0] = max(-vmax, min(commande[1,0] , vmax))
+    
+    return commande
+
+
+# =============================================================================
+# Elaboration de la consigne
+# =============================================================================
+
+def getConsignes(X, a, b, vTarget):
+    return array([[b[0,0]], [b[1,0]], [vTarget]])
 
 # =============================================================================
 # Obtention des dérivées des commandes pour suivi de cap et vitesse.
@@ -119,26 +141,23 @@ def draw_boat(x, size = 0.1):
 plt.figure()
 
 X = array([[0.5], [0.5], [0], [0.5], [0]])
-consignes = array([[0.], [0.]])
+commandes = array([[0.], [0.]])
 
 a = array([[X[0,0]], [X[1,0]]])    
 b = array([[xTarget], [yTarget]])
-w = array([[b[0,0]], [b[1,0]], [vTarget]])
     
 while ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
 
-    plt.cla()
+#    plt.cla()
     plt.xlim((-3, 10))
     plt.ylim((-3, 10))
     plt.gca().set_aspect('equal', adjustable='box')
     
     plt.plot([a[0], b[0]], [a[1], b[1]])
     
-    dU = dCommande(X, w)
-    consignes += dt*dU
-    consignes[0, 0] = max(-angle_max, min(consignes[0] , angle_max))
-    
-    X = newX(X, consignes)
+    commandes = getCommande(X, a, b, vTarget, commandes)
+    print(commandes[0,0])
+    X = newX(X, commandes)
      
     
     

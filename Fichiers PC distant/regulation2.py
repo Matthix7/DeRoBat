@@ -34,7 +34,7 @@ vTarget = 0.5
 
 # =============================================================================
 # Contraintes
-angle_max = pi/6
+angle_max = pi/12
 vmax = 1
 # =============================================================================
 
@@ -83,13 +83,12 @@ def dCommande(X, w):
 # Elaboration de la consigne
 # =============================================================================
 
-def getConsignes(X, a, b):
+def getConsignes(X, a, b, vTarget):
     
     d = b-a
     e = det( hstack(( X[:2]-a, d/norm(d) )) )
     capTarget = atan2(d[1], d[0]) + 0.5*arctan(e)
     
-    vTarget = 0.5
     
     return array([[capTarget], [vTarget]])
     
@@ -99,9 +98,9 @@ def getConsignes(X, a, b):
 # Fonction à appeler depuis le module PosRegul
 # =============================================================================
 
-def getCommande(X, a, b, commande_precedente):
+def getCommande(X, a, b, vTarget, commande_precedente):
     
-    consigne = getConsignes(X, a, b)
+    consigne = getConsignes(X, a, b, vTarget)
     dU = dCommande(X, consigne)
     commande = commande_precedente + dt*dU
     commande[0, 0] = max(-angle_max, min(commande[0,0] , angle_max))
@@ -170,7 +169,7 @@ for k in range(len(Waypoints[0])-1):
         plt.ylim((-15, 15))
         plt.gca().set_aspect('equal', adjustable='box')
         
-        commandes = getCommande(X, a, b, commandes)
+        commandes = getCommande(X, a, b, vTarget, commandes)
         
         X = newX(X, commandes)
          

@@ -13,7 +13,7 @@ import socket
 from threading import Thread
 import time
 #from camFile import Cam
-from positioning import Cam
+from posRegul import Cam
 
 class Writing_Server(Thread):
     """Prise en charge des fonctionnalités d'écriture du serveur"""

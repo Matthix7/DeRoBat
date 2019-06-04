@@ -28,14 +28,15 @@ dt = 0.5
 
 # =============================================================================
 # Consignes
-
+vTarget = 0.2
 # =============================================================================
 
 # =============================================================================
 # Contraintes
-angle_max = pi/4
+angle_max = pi/12
 vmax = 1
-Rayon = 1.5
+Rayon = 0.32
+Rayon_approche = 1
 # =============================================================================
 
 
@@ -52,7 +53,7 @@ def newX(X, u):
     
     newX = array([[   x + dt * v * cos(cap)   ],
                   [   y + dt * v * sin(cap)   ],
-                  [ cap - dt * 1.2*v * sin(servo) ],
+                  [ cap - dt * (1/Rayon)*v * sin(servo) ],
                   [           u[0]            ],
                   [           u[1]            ]])
     
@@ -63,9 +64,9 @@ def newX(X, u):
 # Fonction à appeler depuis le module PosRegul
 # =============================================================================
 
-def getCommande(X, a, b, commande_precedente):
+def getCommande(X, a, b, vTarget, commande_precedente):
     
-    consigne = getConsignes(X, a, b)
+    consigne = getConsignes(X, a, b, vTarget)
     dU = dCommande(X, consigne)
     commande = commande_precedente + dt*dU
     commande[0, 0] = max(-angle_max, min(commande[0,0] , angle_max))
@@ -85,9 +86,9 @@ def rotationTroisTemps(X, capTarget, commande_precedente):
     erreurCap = -sawtooth(capTarget - cap)
     if abs(erreurCap) > 0.2:
         erreurCap = sawtooth(capTarget - cap)
-        derreur = -1.2*v*sin(servo)
+        derreur = -(1/Rayon)*v*sin(servo)
         
-        rudderCommand = (erreurCap + 3*derreur)
+        rudderCommand = (erreurCap + 2*derreur)
         motorCommand = vTarget - v
         
         dU = array([[rudderCommand], [motorCommand]])
@@ -112,9 +113,9 @@ def dCommande(X, w):
     capTarget, vTarget = w[0], w[1]
     
     erreurCap = -sawtooth(capTarget - cap)
-    derreur = -1.2*v*sin(servo) 
+    derreur = -(1/Rayon)*v*sin(servo) 
     
-    rudderCommand = erreurCap + 3*derreur
+    rudderCommand = erreurCap + 2*derreur
     
     motorCommand = vTarget - v
     
@@ -126,13 +127,13 @@ def dCommande(X, w):
 # Elaboration de la consigne
 # =============================================================================
 
-def getConsignes(X, a, b):
+def getConsignes(X, a, b, vTarget):
     
     d = b-a
     e = det( hstack(( X[:2]-a, d/norm(d) )) )
-    capTarget = atan2(d[1], d[0]) + arctan(e/Rayon)
+    capTarget = atan2(d[1], d[0]) + arctan(e/Rayon_approche)
     
-    vTarget = max(0.05, min(0.2*norm(b-X[:2]), 0.2))
+    vTarget = max(0.05, min(0.2*norm(b-X[:2]), vTarget))
     
     return array([[capTarget], [vTarget]])
     
@@ -180,14 +181,14 @@ if __name__ == "__main__":
     # =============================================================================
     # Configuration initiale
     # =============================================================================
-    X = array([[0], [0], [0], [0], [0]])
+    X = array([[1], [1], [1], [0], [0]])
     commandes = array([[0.], [0.]])
     
     
     Waypoints = [[0.5, 3.6, 3.5, 3.5, 3.5, 0.4, 0.5, 0.5],
                  [0.5, 0.5, 0.5, 2.6, 2.5, 2.5, 2.5, 0.4]]
     
-    for tour in range(2):
+    for tour in range(1):
         for k in range(len(Waypoints[0])//2):
             a = array([[Waypoints[0][2*k]], [Waypoints[1][2*k]]])
             b = array([[Waypoints[0][2*k+1]], [Waypoints[1][2*k+1]]])
@@ -200,7 +201,7 @@ if __name__ == "__main__":
                 plt.ylim((0, 3))
                 plt.gca().set_aspect('equal', adjustable='box')
                 
-                commandes = getCommande(X, a, b, commandes)
+                commandes = getCommande(X, a, b, vTarget, commandes)
                 
                 X = newX(X, commandes)
                  
