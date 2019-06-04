@@ -116,7 +116,11 @@ class Listening_Client(Thread):
                     
                     offset = 0 #Correction servo
                     msg_arduino1 = int(max(1040,min(msg_arduino1, 1180-40))+offset)
-                    msg_arduino2 = int(max(2000,min(msg_arduino2, 2254)))
+                    
+                    if msg_arduino2 < 3000:
+                        msg_arduino2 = int(max(2000,min(msg_arduino2, 2254)))
+                    if msg_arduino2 >= 3000:
+                        msg_arduino2 = int(max(3000,min(msg_arduino2, 3254)))
                     
                     msg_arduino1 = str(msg_arduino1).encode()  #Commande servo
                     msg_arduino2 = str(msg_arduino2).encode()  #Commande moteur
