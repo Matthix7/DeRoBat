@@ -77,9 +77,9 @@ class Cam(Thread):
             commandes = getCommande(X, a, b, vTarget, commandes)  #Appel module regulation
             
             if commandes[1,0] >= 0:
-                self.commande = (175*commandes[0,0]+neutreServo, commandes[1,0] + 2000)
+                self.commande = (175*commandes[0,0]+neutreServo, (238*commandes[1,0]+27) + 2000)
             if commandes[1,0] < 0:
-                self.commande = (175*commandes[0,0]+neutreServo, abs(commandes[1,0]) + 3000)
+                self.commande = (175*commandes[0,0]+neutreServo, (390*abs(commandes[1,0])+31) + 3000)
             
             
 # =============================================================================
