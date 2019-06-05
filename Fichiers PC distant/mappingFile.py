@@ -33,6 +33,8 @@ class Map(Thread):
         self.X, self.Y, self.Z = [], [], []
         self.Xcopy, self.Ycopy, self.Zcopy = [], [], []
         self.mapLock = False
+        
+        self.offset_sonar = -10
     
     def toMap(self):
         return self.mapLock, self.Xcopy, self.Ycopy, self.Zcopy, self.xBoat, self.yBoat
@@ -86,7 +88,7 @@ class Map(Thread):
                     mes = eval(line)
                     x, y, cap, sonde, angle_sonde = mes[0], mes[1], mes[2], mes[3], 2*pi*mes[4]/360
                     
-                    angle_sonde = pi/2 + angle_sonde
+                    angle_sonde = pi/2 + angle_sonde - self.offset_sonar*2*pi/360
                     xPoint = x+sin(cap)*sonde*sin(angle_sonde)
                     yPoint = y-cos(cap)*sonde*sin(angle_sonde)
                     zPoint = sonde*cos(angle_sonde)

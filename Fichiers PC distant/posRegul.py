@@ -1,12 +1,12 @@
 import cv2
-import calibrate_fisheye as calibration
 import numpy as np
 import cv2.aruco as aruco
 import cv2.fisheye as fisheye
 import math
 import time
 from threading import Thread
-from regulation import getCommande
+from regulation2 import getCommande
+from numpy.linalg import norm
 
 
 bordBassin = dict() #pour la position des aruco sur le bord
@@ -26,7 +26,7 @@ class Cam(Thread):
         self.is_dead = "alive"
                 
         self.message = str((-1,-1,-1,0,0)) 
-        self.commande = (0,0)
+        self.commande = (1090,2000)
         
         
 
@@ -47,31 +47,30 @@ class Cam(Thread):
         cap1 = cv2.VideoCapture()
         cap1.open(adressCam) 
         
-        DIM, K, D = calibration.defineCalibrationParameters()
         
         neutreServo, neutreMoteur = 1090, 2000
         commandes = np.array([[neutreServo], [neutreMoteur]])
         
-        xTarget = 9
-        yTarget = 9
-        vTarget = 0.5 
+        xTarget = 0.5
+        yTarget = 2.5
+        vTarget = 0.2
         
-        a = np.array([[0], [0]])    
+        a = np.array([[4], [0]])    
         b = np.array([[xTarget], [yTarget]])
-        
+        X = np.array([[0], [0], [0], [0], [0]])
         
         print('Acquisition running.')
-        while(cap1.isOpened()):
+        while(cap1.isOpened()) and ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
             
-            xBoat, yBoat,theta = run_one_step(cap1, DIM, K, D)
+            xBoat, yBoat,theta = run_one_step(cap1)
             
             
 # =============================================================================
 #             Bloc régulation
 # =============================================================================
             
-            posServo = commandes[0,0] - neutreServo  #A changer
-            posMoteur = commandes[1,0] - neutreMoteur #A changer
+            posServo = commandes[0,0]
+            posMoteur = commandes[1,0]
             
             if not xBoat is None: #si les bateau n'est pas vu sur la camera -> soustraction sur un None = Bug
             
@@ -83,14 +82,14 @@ class Cam(Thread):
                 if commandes[1,0] < 0:
                     self.commande = (175*commandes[0,0]+neutreServo, (390*abs(commandes[1,0])+31) + 3000)
             
-            
+                #self.commande = (neutreServo, neutreMoteur)
 # =============================================================================
 #             Expédition des utiles en aval
 # =============================================================================
             
-            if xBoat != None and yBoat != None:
-                print("X = ", xBoat * 4/2350, "Y = ", yBoat*3/2000, "theta =", theta)                
-                self.message = str( (xBoat * 4/2350, yBoat*3/2000, theta) + self.commande)
+            if xBoat != None and yBoat != None and 0 in bordBassin and 10 in bordBassin and 12 in bordBassin:
+                print("X = ", xBoat, "\nY = ", yBoat, "\ntheta =", theta)                
+                self.message = str( (xBoat , yBoat, theta) + self.commande)
             
             if xBoat == None or yBoat == None:
                 self.message = str( (-1, -1, -1) + self.commande)
@@ -111,7 +110,8 @@ class Cam(Thread):
         print('Acquisition ended.')
         cap1.release()
         cv2.destroyAllWindows()
-
+        self.message = str((999,999,999,0,0))
+        self.is_dead = "dead"
 
 
 
@@ -192,11 +192,52 @@ def undistorted(corner,K,D):
     return undistorted.reshape(1,2)[0,0], undistorted.reshape(1,2)[0,1]
     
 
+def getTheta():
+    """
+    Return:
+        angle de rotation entre bordBassin et camera axis
+    """
+    return math.pi/2 - math.atan2(bordBassin[10][1] - bordBassin[0][1], bordBassin[10][0] - bordBassin[0][0])
+
+    
+def getRotationMatrix(theta):
+    """
+    theta : angle de rotation entre plan 1 et plan 2
+    Return:
+        matrice de rotation entre plan 1 et plan 2
+    """
+    return np.array([[math.cos(theta), -math.sin(theta)],
+                     [math.sin(theta), math.cos(theta)]])
+
+
+
+def getBordBassin(corners1, ids1):
+    """
+    corners1 : Corner de la frame
+    ids1 : id de la frame
+    
+    -> Met bordBassin à jour avec les arucos (sauf 4 et 5)
+    """
+    #------ On recupère le bords du bassin ---------
+        
+    if not(ids1 is None) and len(ids1) > 0: 
+        for id in ids1:
+            if id != 4 and id != 5:
+                
+                i,j = np.where(ids1 == id)
+                
+                cornerBassin = corners1[i[0]][j[0]]
+                
+#                xBassin, yBassin = undistorted(cornerBassin, K,D)
+                
+                xBassin, yBassin = getArucoCenter(cornerBassin)
+                            
+                bordBassin[id[0]] = xBassin,yBassin
 
 
 
 
-def getPosition(corners1, ids1, frame1, K, D):
+def getPosition(corners1, ids1, frame1):
     
     """
     corners1 : Corners frame Cam 1
@@ -208,24 +249,7 @@ def getPosition(corners1, ids1, frame1, K, D):
         yBoat: position en Y du bateau (il est inversé ?)
     """
     
-    #------ On recupère le bords du bassin ---------
-        
-    if len(ids1) > 0:
-        for id in ids1:
-            if id != 4 and id != 5:
-                
-                i,j = np.where(ids1 == id)
-                
-                cornerBassin = corners1[i[0]][j[0]]
-                
-                xBassin, yBassin = undistorted(cornerBassin, K,D)
-                
-                #xBassin, yBassin = getArucoCenter(cornerBassin)
-                            
-                bordBassin[id[0]] = xBassin,yBassin
-       
-    #------------------------------------------------
-    
+    getBordBassin(corners1, ids1)    
     #------ On recupère la position du bateau -------
     
     i,j = np.where(ids1 == 4)
@@ -234,27 +258,27 @@ def getPosition(corners1, ids1, frame1, K, D):
     cornerBoat4 = corners1[i[0]][j[0]]
     cornerBoat5 = corners1[k[0]][l[0]]
     
-    #x4,y4 = getArucoCenter(cornerBoat4)
+    x4,y4 = getArucoCenter(cornerBoat4)
 
-    x4, y4 = undistorted(cornerBoat4,K,D)
-    x5, y5 = undistorted(cornerBoat5,K,D)
+#    x4, y4 = undistorted(cornerBoat4,K,D)
+#    x5, y5 = undistorted(cornerBoat5,K,D)
 
-    #x5,y5 = getArucoCenter(cornerBoat5)
+    x5,y5 = getArucoCenter(cornerBoat5)
     
     x = (x4 + x5)/2
     y = (y4 + y5)/2
     
 #--- On ajuste la position du bateau au bassin ---
-    if len(bordBassin) > 0:
+    if 0 in bordBassin and 10 in bordBassin and 12 in bordBassin:
         
-        xBoat = abs(x - bordBassin[0][0])
-        yBoat = abs(y - bordBassin[0][1])
-        """
-        x4,y4 = getArucoCenter(cornerBoat4)
-        x5,y5 = getArucoCenter(cornerBoat5)
-        xBoat = (x4 + x5)/2
-        yBoat = (y4 + y5)/2
-        """
+        pos = np.array([[abs(x - bordBassin[0][0])],
+                        [abs(y - bordBassin[0][1])]])
+    
+    
+        pos = getRotationMatrix(getTheta()) @ pos
+        
+        xBoat = pos[0][0] * 3.5/(bordBassin[12][0] - bordBassin[0][0])
+        yBoat = pos[1][0] * 3/(bordBassin[10][1] - bordBassin[0][1])
 
     else:
         xBoat,yBoat = None,None
@@ -268,7 +292,6 @@ def getPosition(corners1, ids1, frame1, K, D):
 
 
 def getCap(corners1, ids1):
-    
     """
     corners1 : Corners Arucos du bateau
     ids1 : Ids Arucos du Bateau
@@ -276,35 +299,42 @@ def getCap(corners1, ids1):
     Return:
         angle : cap en radians 
     """
-    i1,j1 = np.where(ids1 == 4)
-    i2,j2 = np.where(ids1 == 5)
-
-    arucoBoat1 = corners1[i1[0]][j1[0]]
-    xAr4, yAr4 = getArucoCenter(arucoBoat1)
+    angle = math.nan
+    if 0 in bordBassin and 10 in bordBassin:
     
-    arucoBoat2 = corners1[i2[0]][j2[0]]  
-    xAr5, yAr5 = getArucoCenter(arucoBoat2)
+        i1,j1 = np.where(ids1 == 4)
+        i2,j2 = np.where(ids1 == 5)
     
-    angle = math.atan2( yAr5-yAr4, xAr5-xAr4 )
+        arucoBoat1 = corners1[i1[0]][j1[0]]
+        xAr4, yAr4 = getArucoCenter(arucoBoat1)
+        
+        arucoBoat2 = corners1[i2[0]][j2[0]]  
+        xAr5, yAr5 = getArucoCenter(arucoBoat2)
+            
+        angle = math.atan2( yAr5-yAr4, xAr5-xAr4 ) - getTheta()
+    
     return (angle)
 
 
     
 
 
-def run_one_step(cap1, DIM, K, D):
+def run_one_step(cap1):
     
     ret1, frame1 = cap1.read()
     if ret1:
-        cv2.imshow("Webcam", frame1)
         
         corners1, ids1 = detectAruco(frame1)
+        aruco.drawDetectedMarkers(frame1, corners1, ids1)
+        cv2.imshow("Webcam", frame1)
+
+        
         
         if not(ids1 is None) and len(ids1)> 0 and (4 in ids1 and 5 in ids1): #le bateau est sur la cam1 ou la cam2 (ou les deux en meme temps)
             
             theta = getCap(corners1, ids1)
                         
-            xBoat, yBoat = getPosition(corners1, ids1, frame1, K, D)
+            xBoat, yBoat = getPosition(corners1, ids1, frame1)
             
             
             
