@@ -73,13 +73,15 @@ class Cam(Thread):
             posServo = commandes[0,0] - neutreServo
             posMoteur = commandes[1,0] - neutreMoteur
             
-            X = np.array([[xBoat], [yBoat], [theta], [posServo], [posMoteur]])
-            commandes = getCommande(X, a, b, vTarget, commandes)  #Appel module regulation
+            if not xBoat is None: #si les bateau n'est pas vu sur la camera -> soustraction sur un None = Bug
             
-            if commandes[1,0] >= 0:
-                self.commande = (175*commandes[0,0]+neutreServo, commandes[1,0] + 2000)
-            if commandes[1,0] < 0:
-                self.commande = (175*commandes[0,0]+neutreServo, abs(commandes[1,0]) + 3000)
+                X = np.array([[xBoat], [yBoat], [theta], [posServo], [posMoteur]])
+                commandes = getCommande(X, a, b, vTarget, commandes)  #Appel module regulation
+                
+                if commandes[1,0] >= 0:
+                    self.commande = (175*commandes[0,0]+neutreServo, commandes[1,0] + 2000)
+                if commandes[1,0] < 0:
+                    self.commande = (175*commandes[0,0]+neutreServo, abs(commandes[1,0]) + 3000)
             
             
 # =============================================================================

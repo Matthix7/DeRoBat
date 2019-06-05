@@ -2,6 +2,7 @@
 
 # =============================================================================
 # REGULATION MANOEUVRES POUR SUIVI DE LIGNE (coupure des virages)
+# Suivi de 4 points (un dans chaque angle)
 # =============================================================================
 
 """

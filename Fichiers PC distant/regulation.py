@@ -158,6 +158,7 @@ while ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
     commandes = getCommande(X, a, b, vTarget, commandes)
     print(commandes[0,0])
     X = newX(X, commandes)
+    
      
     
     
