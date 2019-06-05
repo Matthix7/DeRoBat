@@ -68,12 +68,14 @@ class Cam(Thread):
             
 # =============================================================================
 #             Bloc régulation
+#            array commandes = ([[radians], [m/s]])
+#            array self.commande = ([[pwm], [pwm]])
 # =============================================================================
             
-            posServo = commandes[0,0] - neutreServo  #A changer
-            posMoteur = commandes[1,0] - neutreMoteur #A changer
+            posServo = commandes[0,0]
+            posMoteur = commandes[1,0]
             
-            if not xBoat is None: #si les bateau n'est pas vu sur la camera -> soustraction sur un None = Bug
+            if not xBoat is None: #si le bateau n'est pas vu sur la camera -> soustraction sur un None = Bug
             
                 X = np.array([[xBoat], [yBoat], [theta], [posServo], [posMoteur]])
                 commandes = getCommande(X, a, b, vTarget, commandes)  #Appel module regulation
@@ -85,7 +87,7 @@ class Cam(Thread):
             
             
 # =============================================================================
-#             Expédition des utiles en aval
+#             Expédition des données utiles en aval
 # =============================================================================
             
             if xBoat != None and yBoat != None:
