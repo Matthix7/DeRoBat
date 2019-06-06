@@ -86,7 +86,7 @@ class Cam(Thread):
             
                 X = np.array([[xBoat], [yBoat], [theta], [posServo], [posMoteur]])
                 commandes = getCommande(X, a, b, vTarget, commandes)  #Appel module regulation
-                    
+                
                 if commandes[1,0] >= 0:
                     self.commande = (175*commandes[0,0]+neutreServo, (238*commandes[1,0]+27) + 2000)
                 if commandes[1,0] < 0:
