@@ -136,7 +136,7 @@ def draw_boat(x, size = 0.1):
 
 
 
-if __name__ == "__name__":
+if __name__ == "__main__":
 
     plt.figure()
     

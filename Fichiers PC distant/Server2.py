@@ -50,12 +50,12 @@ plt.figure()
 plt.title("Représentation théorique du bassin")
 
 pas = 1/20
-Z_tab = -3*np.ones((int(3/pas), int(4/pas)))
-X_tab = np.linspace(0,4,np.shape(Z_tab)[1])
-Y_tab = np.linspace(0,3,np.shape(Z_tab)[0])
+Z_tab = -3*np.ones((int(4/pas), int(3/pas)))
+X_tab = np.linspace(0,3,np.shape(Z_tab)[1])
+Y_tab = np.linspace(0,4,np.shape(Z_tab)[0])
 
 while alive.is_set():
-    X, Y, Z = thread_listening.toMap()
+    X, Y, Z,x,y = thread_listening.toMap()
     
     if X != []:
         #Représentation 3D en 2D
@@ -71,7 +71,7 @@ while alive.is_set():
             
          plt.draw()
         
-         plt.pause(0.1)
+         plt.pause(0.5)
     
 
 

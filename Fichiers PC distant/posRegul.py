@@ -51,16 +51,24 @@ class Cam(Thread):
         neutreServo, neutreMoteur = 1090, 2000
         commandes = np.array([[neutreServo], [neutreMoteur]])
         
-        xTarget = 0.5
-        yTarget = 2.5
-        vTarget = 0.2
+        Waypoints = [[0,0],# ,3   ,0.5 ,0.5],
+                     [1,1]]# ,2.5 ,0.5 ,2.5]]
+    
+        for k in range(len(Waypoints[0])-1):
+            a = np.array([[Waypoints[0][k]], [Waypoints[1][k]]])
+            b = np.array([[Waypoints[0][k+1]], [Waypoints[1][k+1]]])
+
         
-        a = np.array([[4], [0]])    
-        b = np.array([[xTarget], [yTarget]])
+#        xTarget = 3.5
+#        yTarget = 0.5
+        vTarget = 0.19
+#        
+#        a = np.array([[4], [0]])    
+#        b = np.array([[xTarget], [yTarget]])
         X = np.array([[0], [0], [0], [0], [0]])
         
-        print('Acquisition running.')
-        while(cap1.isOpened()) and ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
+        print('Acquisition running...')
+        while(cap1.isOpened()) :#and ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
             
             xBoat, yBoat,theta = run_one_step(cap1)
             
@@ -84,12 +92,13 @@ class Cam(Thread):
                 if commandes[1,0] < 0:
                     self.commande = (175*commandes[0,0]+neutreServo, (390*abs(commandes[1,0])+31) + 3000)
             
-                #self.commande = (neutreServo, neutreMoteur)
+                self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
 # =============================================================================
 #             Expédition des données utiles en aval
 # =============================================================================
             
             if xBoat != None and yBoat != None and 0 in bordBassin and 10 in bordBassin and 12 in bordBassin:
+
                 print("X = ", xBoat, "\nY = ", yBoat, "\ntheta =", theta)                
                 self.message = str( (xBoat , yBoat, theta) + self.commande)
             
@@ -342,13 +351,16 @@ def run_one_step(cap1):
             
         else: #le bateau n'est sur aucune camera
             print("ERROR : No boat detected")
-            xBoat, yBoat, theta = None, None, None
+            return None, None, None
         
     else: #le bateau n'est sur aucune camera
             print("ERROR : No image")
-            xBoat, yBoat, theta = None, None, None
+            return None, None, None
     
 #    aruco.drawDetectedMarkers(frame1, corners1, ids1)
+            
+    if math.isnan(theta):
+        return -1,-1,-1
     
     return xBoat, yBoat,theta
 
