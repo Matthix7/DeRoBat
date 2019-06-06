@@ -23,6 +23,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 import scipy.stats
 import numpy as np
+import time
 
 PORT_ALLER = 12800
 PORT_RETOUR = 12801
@@ -60,12 +61,18 @@ ax.yaxis.tick_right()
 
 file = open("bathymetrie.txt","w") #to write in a file (final bathy representation, contourf)
 
+plt.plot(1,2, color = 'green', marker = 'o')
 
-
+traceX = []
+traceY = []
 while alive.is_set():
     X, Y, Z, xBoat, yBoat = thread_listening.toMap()
     
+    if not xBoat is None and xBoat != 0 and yBoat != 0 and xBoat != -1 and yBoat != -1:
+        traceX.append(xBoat)
+        traceY.append(yBoat)
     
+    X = []
     if X != []:
         #Représentation 3D en 2D
 #        plt.scatter(X, Y, c = Z, cmap='viridis')
@@ -79,19 +86,25 @@ while alive.is_set():
             g = 2.5*std*scipy.stats.norm.pdf(z,-2.5,std)
             b = 2.5*std*scipy.stats.norm.pdf(z,-3,std)
         
-            col = np.array([r,g,b]) #blue if z = -3, green if z = -1.5, red if z = 0
+            col = np.array([r,g,b]) #blue if z = -3, green if z = -2.5, red if z = -2
     
-            scat = plt.scatter(y, x, marker = 'o', c=col)
+            #scat = plt.scatter(y, x, marker = 'o', c=col)
             #fig.colorbar(scat, label="Z")
             
             file.write(str(x)+"\t"+str(y)+"\t"+str(z))
-
-        plt.scatter(yBoat, xBoat, 'xred')
+            
         plt.pause(2)
+        
+    time.sleep(0.1)
+
                  
-    
+plt.plot(traceY, traceX, marker = 'x', color = 'red')
+print(traceY)
 
 
 file.close()
 # Attend que les threads se terminent
 thread_listening.join()
+
+
+

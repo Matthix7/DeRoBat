@@ -143,43 +143,43 @@ def draw_boat(x, size = 0.1):
 
 
 
+if __name__ == '__main__':
 
-
-plt.figure()
-
-# =============================================================================
-# Configuration initiale
-# =============================================================================
-X = array([[0.5], [5], [0], [0.5], [0]])
-commandes = array([[0.], [0.]])
-
-
-Waypoints = [[10, 5, -5, -10],
-             [-10, 10, -10, 10]]
-
-for k in range(len(Waypoints[0])-1):
-    a = array([[Waypoints[0][k]], [Waypoints[1][k]]])
-    b = array([[Waypoints[0][k+1]], [Waypoints[1][k+1]]])
+    plt.figure()
     
-    while ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
+    # =============================================================================
+    # Configuration initiale
+    # =============================================================================
+    X = array([[0.5], [5], [0], [0.5], [0]])
+    commandes = array([[0.], [0.]])
+    
+    
+    Waypoints = [[10, 5, -5, -10],
+                 [-10, 10, -10, 10]]
+    
+    for k in range(len(Waypoints[0])-1):
+        a = array([[Waypoints[0][k]], [Waypoints[1][k]]])
+        b = array([[Waypoints[0][k+1]], [Waypoints[1][k+1]]])
+        
+        while ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
+                
+               
+            plt.cla()
+            plt.xlim((-15, 15))
+            plt.ylim((-15, 15))
+            plt.gca().set_aspect('equal', adjustable='box')
             
-           
-        plt.cla()
-        plt.xlim((-15, 15))
-        plt.ylim((-15, 15))
-        plt.gca().set_aspect('equal', adjustable='box')
+            commandes = getCommande(X, a, b, vTarget, commandes)
+            
+            X = newX(X, commandes)
+             
+            
+            plt.plot([a[0], b[0]], [a[1], b[1]])
+            
+            draw_boat(X)
+             
+            plt.pause(dt)
         
-        commandes = getCommande(X, a, b, vTarget, commandes)
-        
-        X = newX(X, commandes)
-         
-        
-        plt.plot([a[0], b[0]], [a[1], b[1]])
-        
-        draw_boat(X)
-         
-        plt.pause(dt)
-    
 
 
 

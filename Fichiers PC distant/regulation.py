@@ -136,35 +136,35 @@ def draw_boat(x, size = 0.1):
 
 
 
+if __name__ == "__name__":
 
-
-plt.figure()
-
-X = array([[0.5], [0.5], [0], [0.5], [0]])
-commandes = array([[0.], [0.]])
-
-a = array([[X[0,0]], [X[1,0]]])    
-b = array([[xTarget], [yTarget]])
+    plt.figure()
     
-while ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
-
-#    plt.cla()
-    plt.xlim((-3, 10))
-    plt.ylim((-3, 10))
-    plt.gca().set_aspect('equal', adjustable='box')
+    X = array([[0.5], [0.5], [0], [0.5], [0]])
+    commandes = array([[0.], [0.]])
     
-    plt.plot([a[0], b[0]], [a[1], b[1]])
+    a = array([[X[0,0]], [X[1,0]]])    
+    b = array([[xTarget], [yTarget]])
+        
+    while ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
     
-    commandes = getCommande(X, a, b, vTarget, commandes)
-    print(commandes[0,0])
-    X = newX(X, commandes)
-    
-     
-    
-    
-    draw_boat(X)
-     
-    plt.pause(dt)
+    #    plt.cla()
+        plt.xlim((-3, 10))
+        plt.ylim((-3, 10))
+        plt.gca().set_aspect('equal', adjustable='box')
+        
+        plt.plot([a[0], b[0]], [a[1], b[1]])
+        
+        commandes = getCommande(X, a, b, vTarget, commandes)
+        print(commandes[0,0])
+        X = newX(X, commandes)
+        
+         
+        
+        
+        draw_boat(X)
+         
+        plt.pause(dt)
     
 
 
