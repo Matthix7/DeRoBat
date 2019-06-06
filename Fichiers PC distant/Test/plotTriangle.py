@@ -7,20 +7,27 @@ Created on Thu Jun  6 14:58:00 2019
 
 import numpy as np 
 import matplotlib.pyplot as plt
+import math
+figScat = plt.figure(0)
+plt.title("Représentation du bassin Locale")
+ax = figScat.add_subplot(111)
+plt.xlim(-5,5)
+plt.ylim(-5,5)
 
-X = np.array([[1,1], [2,2.5], [3, 1], [8, 7.5], [7, 9], [9, 9]])
-Y = ['red', 'red', 'red', 'blue', 'blue', 'blue']
+plt.gca().set_aspect('equal', adjustable = 'box')
+plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
+ax.yaxis.tick_right()
 
-plt.figure()
-plt.scatter(X[:, 0], X[:, 1], s = 0, color = Y[:])
+
+x,y,t = 0,0,90
+t = math.radians(t)
+X = np.array([[x-0.02,y+0.02], [x-0.02,y-0.02], [x+0.04*np.sign(t)*t, y+0.04*np.sign(t)*t]])
+
 
 t1 = plt.Polygon(X[:3,:], color="red")
 plt.gca().add_patch(t1)
 
-t2 = plt.Polygon(X[3:6,:], color=Y[3])
-plt.gca().add_patch(t2)
-
-t2.remove()
+#t2.remove()
 
 plt.show()
 

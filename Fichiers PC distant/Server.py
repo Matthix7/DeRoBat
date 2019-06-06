@@ -23,8 +23,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 import scipy.stats
 import numpy as np
-import time
-import cv2
+
 
 PORT_ALLER = 12800
 PORT_RETOUR = 12801
@@ -99,6 +98,7 @@ while alive.is_set():
         
         plt.figure(0)
         plt.plot(yBoat, xBoat, marker = 'x', color = 'red')
+        
             
         nbPlot += 1
         if nbPlot >= 10:

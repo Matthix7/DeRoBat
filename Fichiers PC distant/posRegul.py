@@ -51,12 +51,20 @@ class Cam(Thread):
         neutreServo, neutreMoteur = 1090, 2000
         commandes = np.array([[neutreServo], [neutreMoteur]])
         
-        xTarget = 0.5
-        yTarget = 2.5
-        vTarget = 0.2
+        Waypoints = [[0.5, 3  ],# ,3   ,0.5 ,0.5],
+                     [2.5, 0.5 ]]# ,2.5 ,0.5 ,2.5]]
+    
+        for k in range(len(Waypoints[0])-1):
+            a = np.array([[Waypoints[0][k]], [Waypoints[1][k]]])
+            b = np.array([[Waypoints[0][k+1]], [Waypoints[1][k+1]]])
+
         
-        a = np.array([[4], [0]])    
-        b = np.array([[xTarget], [yTarget]])
+#        xTarget = 3.5
+#        yTarget = 0.5
+        vTarget = 0.19
+#        
+#        a = np.array([[4], [0]])    
+#        b = np.array([[xTarget], [yTarget]])
         X = np.array([[0], [0], [0], [0], [0]])
         
         print('Acquisition running...')
@@ -84,7 +92,7 @@ class Cam(Thread):
                 if commandes[1,0] < 0:
                     self.commande = (175*commandes[0,0]+neutreServo, (390*abs(commandes[1,0])+31) + 3000)
             
-                self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
+#                self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
 # =============================================================================
 #             Expédition des données utiles en aval
 # =============================================================================
