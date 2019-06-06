@@ -51,8 +51,8 @@ class Cam(Thread):
         neutreServo, neutreMoteur = 1090, 2000
         commandes = np.array([[neutreServo], [neutreMoteur]])
         
-        Waypoints = [[0.5, 3  ],# ,3   ,0.5 ,0.5],
-                     [2.5, 0.5 ]]# ,2.5 ,0.5 ,2.5]]
+        Waypoints = [[0,0],# ,3   ,0.5 ,0.5],
+                     [1,1]]# ,2.5 ,0.5 ,2.5]]
     
         for k in range(len(Waypoints[0])-1):
             a = np.array([[Waypoints[0][k]], [Waypoints[1][k]]])
@@ -68,7 +68,7 @@ class Cam(Thread):
         X = np.array([[0], [0], [0], [0], [0]])
         
         print('Acquisition running...')
-        while(cap1.isOpened()) and ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
+        while(cap1.isOpened()) :#and ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
             
             xBoat, yBoat,theta = run_one_step(cap1)
             
@@ -92,7 +92,7 @@ class Cam(Thread):
                 if commandes[1,0] < 0:
                     self.commande = (175*commandes[0,0]+neutreServo, (390*abs(commandes[1,0])+31) + 3000)
             
-#                self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
+                self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
 # =============================================================================
 #             Expédition des données utiles en aval
 # =============================================================================

@@ -20,6 +20,7 @@ from Thread_Server_Listening import *
 from Thread_Server_Writing import *
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import matplotlib as mpl
 
 import scipy.stats
 import numpy as np
@@ -39,11 +40,25 @@ thread_listening = Listening_Server(PORT_ALLER, PORT_RETOUR, alive)
 thread_listening.start()
 
 
-#------------ Init pour l'affichage de le Scatter-----------
+#------------- Init pour l'affichage de le Scatter-------------
 figScat = plt.figure(0)
 plt.title("Représentation du bassin Locale")
+
+min, max = (-3, 0) #max and min for the colorbar (in meters)
+step = 0.01
+
+# Setting up a colormap that's a simple transtion
+mymap = mpl.colors.LinearSegmentedColormap.from_list('mycolors',['blue','green','red'])
+
+# Using contourf to provide my colorbar info, then clearing the figure
+Z = [[0,0],[0,0]]
+levels = np.arange(min,max+step,step)
+CS3 = plt.contourf(Z, levels, cmap=mymap)
+plt.clf()
+
 ax = figScat.add_subplot(111)
 
+plt.colorbar(CS3, orientation= "horizontal") # using the colorbar info I got from contourf
 
 plt.xlim(0,3)
 plt.ylim(0,4)
@@ -54,7 +69,7 @@ ax.yaxis.tick_right()
 
 nbPlot = 0 #contient le nombre de plot fait sur le scatter
 
-#--------------------------------------------------------
+#------------------------------------------------------------
 #------------ Init pour l'affichage de le Contourf-----------
 figCont = plt.figure(1)
 plt.title("Représentation du bassin Globale")
