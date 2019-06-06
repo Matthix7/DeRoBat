@@ -39,10 +39,11 @@ thread_listening = Listening_Server(PORT_ALLER, PORT_RETOUR, alive)
 # Lancement des threads
 thread_listening.start()
 
-
+###############################################################
 #------------- Init pour l'affichage de le Scatter-------------
+###############################################################
 figScat = plt.figure(0)
-plt.title("Représentation du bassin Locale")
+plt.title("Représentation locale du bassin ")
 
 min, max = (-3, 0) #max and min for the colorbar (in meters)
 step = 0.01
@@ -70,14 +71,23 @@ ax.yaxis.tick_right()
 nbPlot = 0 #contient le nombre de plot fait sur le scatter
 
 #------------------------------------------------------------
+#############################################################
 #------------ Init pour l'affichage de le Contourf-----------
+#############################################################
 figCont = plt.figure(1)
-plt.title("Représentation du bassin Globale")
+plt.title("Représentation globale du bassin")
+Z = [[0,0],[0,0]]
+levels = np.arange(min,max+step,step)
+Cont = plt.contourf(Z, levels, cmap=mymap)
+plt.clf()
+
 ax = figCont.add_subplot(111)
 
+plt.colorbar(Cont, orientation = "horizontal")
 plt.gca().set_aspect('equal', adjustable = 'box')
 plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
 ax.yaxis.tick_right()
+
 
 X_Cont = [] #stockage des valeurs de x,y,z
 Y_Cont = []
@@ -104,7 +114,7 @@ while alive.is_set():
         
             col = np.array([[r,g,b]]) #blue if z = -3, green if z = -1.5, red if z = -0
             plt.figure(0)
-            plt.scatter(y, x, marker = 'o', c=col)
+            plt.scatter(y, x, marker = 'o', c = col)
             
             X_Cont.append(y)
             Y_Cont.append(x)
@@ -120,7 +130,7 @@ while alive.is_set():
             print("-----------------CLEAR AXES----------------")
             plt.figure(0)
             plt.cla()
-            plt.title("Représentation du bassin Locale")
+            plt.title("Représentation locale du bassin")
             ax = figScat.add_subplot(111)
             plt.xlim(0,3)
             plt.ylim(0,4)
@@ -131,7 +141,7 @@ while alive.is_set():
             nbPlot = 0           
             print("-----------------Update Bathymetrie----------------")
             
-            pas = 1/10
+            pas = 1/5
             ZCont = -3*np.ones((int(4/pas), int(3/pas)))
             XCont = np.linspace(0,3,np.shape(ZCont)[1])
             YCont = np.linspace(0,4,np.shape(ZCont)[0])               
@@ -141,7 +151,7 @@ while alive.is_set():
                 ZCont[int(Y_Cont[ind]/pas)][int(X_Cont[ind]/pas)] = np.mean([ZCont[int(Y_Cont[ind]/pas)][int(X_Cont[ind]/pas)], Z_Cont[ind]])
          
             plt.figure(1)
-            plt.contourf(XCont, YCont, ZCont)
+            Cont = plt.contourf(XCont, YCont, ZCont, levels = levels, cmap=mymap)
             plt.draw()
             
         plt.pause(2)
