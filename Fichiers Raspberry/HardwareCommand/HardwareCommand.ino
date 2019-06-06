@@ -23,7 +23,7 @@ void setup() {
 
   monServomoteur.attach(6);
   //Setup Channel A
-  pinMode(12, OUTPUT); //Initiates Motor Channel A pin
+  pinMode(12, OUTPUT); //Initiates direction of Motor Channel A pin
   pinMode(3, OUTPUT); //Initiates Speed Channel A pin
   pinMode(9, OUTPUT); //Initiates Brake Channel A pin
 
