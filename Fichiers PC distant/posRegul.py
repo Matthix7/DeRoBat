@@ -84,7 +84,7 @@ class Cam(Thread):
                 if commandes[1,0] < 0:
                     self.commande = (175*commandes[0,0]+neutreServo, (390*abs(commandes[1,0])+31) + 3000)
             
-                #self.commande = (neutreServo, neutreMoteur)
+                self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
 # =============================================================================
 #             Expédition des données utiles en aval
 # =============================================================================

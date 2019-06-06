@@ -24,6 +24,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import scipy.stats
 import numpy as np
 import time
+import cv2
 
 PORT_ALLER = 12800
 PORT_RETOUR = 12801
@@ -38,14 +39,8 @@ thread_listening = Listening_Server(PORT_ALLER, PORT_RETOUR, alive)
 # Lancement des threads
 thread_listening.start()
 
-reduc=10
-X_tab = np.arange(0, 3*reduc, 1) #discrétisation à effectuer
-Y_tab = np.arange(0,4*reduc, 1)
-Z_tab = np.ones((4*reduc,3*reduc)) * -3
-#
-#surf  = plt.contourf(X_tab, Y_tab, Z_tab)
 
-
+#------------ Init pour l'affichage de la bathy-----------
 fig = plt.figure()
 plt.title("Représentation théorique du bassin")
 ax = fig.add_subplot(111)
@@ -61,7 +56,10 @@ ax.yaxis.tick_right()
 
 file = open("bathymetrie.txt","w") #to write in a file (final bathy representation, contourf)
 
-plt.plot(1,2, color = 'green', marker = 'o')
+#plt.plot(1,2, color = 'green', marker = 'o')
+nbPlot = 0 #contient le nombre de plot fait sur le scatter
+
+#--------------------------------------------------------
 
 traceX = []
 traceY = []
@@ -72,34 +70,33 @@ while alive.is_set():
         traceX.append(xBoat)
         traceY.append(yBoat)
     
-    X = []
+#    X = []
     if X != []:
         #Représentation 3D en 2D
-#        plt.scatter(X, Y, c = Z, cmap='viridis')
-    
-#        ax.scatter3D(X, Y, Z, c=Z, cmap='viridis')
-        
-        #bathy 3d avec scatter couleur entre -3 et -2 m
+        #bathy 3d avec scatter couleur entre -3 et 0 m
         for x,y,z in zip(X,Y,Z):
-            std = 0.2
-            r = 2.5*std*scipy.stats.norm.pdf(z,-2,std)
-            g = 2.5*std*scipy.stats.norm.pdf(z,-2.5,std)
+            std = 0.4
+            r = 2.5*std*scipy.stats.norm.pdf(z,0,std)
+            g = 2.5*std*scipy.stats.norm.pdf(z,-1.5,std)
             b = 2.5*std*scipy.stats.norm.pdf(z,-3,std)
         
-            col = np.array([r,g,b]) #blue if z = -3, green if z = -2.5, red if z = -2
+            col = np.array([r,g,b]) #blue if z = -3, green if z = -1.5, red if z = -0
     
-            #scat = plt.scatter(y, x, marker = 'o', c=col)
-            #fig.colorbar(scat, label="Z")
-            
             file.write(str(x)+"\t"+str(y)+"\t"+str(z))
             
+        plt.plot(traceY, traceX, marker = 'x', color = 'red')
+            
         plt.pause(2)
-        
-    time.sleep(0.1)
+        nbPlot += 1
+        if nbPlot >= 5:
+            plt.cla()
+            traceX = []
+            traceY = []
+#    time.sleep(0.1)
 
                  
-plt.plot(traceY, traceX, marker = 'x', color = 'red')
-print(traceY)
+#plt.plot(traceY, traceX, marker = 'x', color = 'red')
+#print(traceY)
 
 
 file.close()
