@@ -59,7 +59,7 @@ class Cam(Thread):
         b = np.array([[xTarget], [yTarget]])
         X = np.array([[0], [0], [0], [0], [0]])
         
-        print('Acquisition running.')
+        print('Acquisition running...')
         while(cap1.isOpened()) and ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
             
             xBoat, yBoat,theta = run_one_step(cap1)
@@ -90,6 +90,7 @@ class Cam(Thread):
 # =============================================================================
             
             if xBoat != None and yBoat != None and 0 in bordBassin and 10 in bordBassin and 12 in bordBassin:
+
                 print("X = ", xBoat, "\nY = ", yBoat, "\ntheta =", theta)                
                 self.message = str( (xBoat , yBoat, theta) + self.commande)
             
@@ -342,13 +343,16 @@ def run_one_step(cap1):
             
         else: #le bateau n'est sur aucune camera
             print("ERROR : No boat detected")
-            xBoat, yBoat, theta = None, None, None
+            return None, None, None
         
     else: #le bateau n'est sur aucune camera
             print("ERROR : No image")
-            xBoat, yBoat, theta = None, None, None
+            return None, None, None
     
 #    aruco.drawDetectedMarkers(frame1, corners1, ids1)
+            
+    if math.isnan(theta):
+        return -1,-1,-1
     
     return xBoat, yBoat,theta
 

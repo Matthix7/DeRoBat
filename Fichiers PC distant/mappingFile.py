@@ -34,7 +34,7 @@ class Map(Thread):
         self.Xcopy, self.Ycopy, self.Zcopy = [], [], []
         self.mapLock = False
         
-        self.offset_sonar = -10
+        self.offset_sonar = -4
     
     def toMap(self):
         return self.mapLock, self.Xcopy, self.Ycopy, self.Zcopy, self.xBoat, self.yBoat

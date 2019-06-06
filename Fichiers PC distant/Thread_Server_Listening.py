@@ -43,6 +43,7 @@ class Listening_Server(Thread):
         self.X, self.Y, self.Z, self.xBoat, self.yBoat = [], [], [], 0, 0
         
         
+        
     def toMap(self):
         return self.X, self.Y, self.Z, self.xBoat, self.yBoat
     
@@ -106,7 +107,7 @@ class Listening_Server(Thread):
                 mapLock, X, Y, Z, xBoat, yBoat = thread_map.toMap()
                 if not mapLock:
                     self.X, self.Y, self.Z, self.xBoat, self.yBoat = X, Y, Z, xBoat, yBoat
-                
+                                
                     
     
         self.file.close()
