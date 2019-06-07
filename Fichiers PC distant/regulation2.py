@@ -92,7 +92,16 @@ def getConsignes(X, a, b, vTarget):
     
     return array([[capTarget], [vTarget]])
     
-    
+
+def minFloat(x,y):
+    if x > y:
+        return y
+    return x
+
+def maxFloat(x,y):
+    if x > y:
+        return x
+    return y
     
 # =============================================================================
 # Fonction à appeler depuis le module PosRegul
@@ -103,8 +112,8 @@ def getCommande(X, a, b, vTarget, commande_precedente):
     consigne = getConsignes(X, a, b, vTarget)
     dU = dCommande(X, consigne)
     commande = commande_precedente + dt*dU
-    commande[0, 0] = max(-angle_max, min(commande[0,0] , angle_max))
-    commande[1, 0] = max(-vmax, min(commande[1,0] , vmax))
+    commande[0, 0] = maxFloat(-angle_max, minFloat(commande[0,0] , angle_max))
+    commande[1, 0] = maxFloat(-vmax, minFloat(commande[1,0] , vmax))
     
     return commande
 
@@ -154,8 +163,8 @@ if __name__ == '__main__':
     commandes = array([[0.], [0.]])
     
     
-    Waypoints = [[10, 5, -5, -10],
-                 [-10, 10, -10, 10]]
+    Waypoints = [[0,3.5],
+                 [3,0.5]]
     
     for k in range(len(Waypoints[0])-1):
         a = array([[Waypoints[0][k]], [Waypoints[1][k]]])

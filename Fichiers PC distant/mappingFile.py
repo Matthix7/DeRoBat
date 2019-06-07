@@ -34,7 +34,12 @@ class Map(Thread):
         self.Xcopy, self.Ycopy, self.Zcopy = [], [], []
         self.mapLock = False
         
-        self.offset_sonar = -4
+        self.offset_sonar = 0
+        
+    def offsetSonar(self,Z=[]):
+        print("---------Reglage offset Sonar-----------")
+        print("      Laisser le bateau imobile")
+        Z = [val for val in Z if val != -1]
     
     def toMap(self):
         return self.mapLock, self.Xcopy, self.Ycopy, self.Zcopy, self.xBoat, self.yBoat
