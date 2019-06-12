@@ -24,7 +24,7 @@ class Cam(Thread):
     def __init__(self):
         Thread.__init__(self)
         self.is_dead = "alive"
-                
+                        
         self.message = str((-1,-1,-1,0,0)) 
         self.commande = (1090,2000)
         
@@ -51,8 +51,8 @@ class Cam(Thread):
         neutreServo, neutreMoteur = 1090, 2000
         commandes = np.array([[neutreServo], [neutreMoteur]])
         
-        Waypoints = [[4,0.5],# ,3   ,0.5 ,0.5],
-                     [0,3.5]]# ,2.5 ,0.5 ,2.5]]
+        Waypoints = [[4,0],# ,3   ,0.5 ,0.5],
+                     [0,3]]# ,2.5 ,0.5 ,2.5]]
     
         for k in range(len(Waypoints[0])-1):
             a = np.array([[Waypoints[0][k]], [Waypoints[1][k]]])
@@ -70,8 +70,8 @@ class Cam(Thread):
         print('Acquisition running...')
         while(cap1.isOpened()) and ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
             
-            xBoat, yBoat,theta = run_one_step(cap1)
-            
+            xBoat, yBoat,theta = run_one_step(cap1,b)
+
             
 # =============================================================================
 #             Bloc régulation
@@ -92,14 +92,13 @@ class Cam(Thread):
                 if commandes[1,0] < 0:
                     self.commande = (175*commandes[0,0]+neutreServo, (390*abs(commandes[1,0])+31) + 3000)
             
-#                self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
+                self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
 # =============================================================================
 #             Expédition des données utiles en aval
 # =============================================================================
-            
             if xBoat != None and yBoat != None and 0 in bordBassin and 10 in bordBassin and 12 in bordBassin:
 
-                print("X = ", xBoat, "\nY = ", yBoat, "\ntheta =", theta)                
+                print("X = ", xBoat, "\nY = ", yBoat, "\ntheta =", math.degrees(theta))                
                 self.message = str( (xBoat , yBoat, theta) + self.commande)
             
             if xBoat == None or yBoat == None:
@@ -288,6 +287,7 @@ def getPosition(corners1, ids1, frame1):
     
         pos = getRotationMatrix(getTheta()) @ pos
         
+        
         xBoat = pos[0][0] * 3.5/(bordBassin[12][0] - bordBassin[0][0])
         yBoat = pos[1][0] * 3/(bordBassin[10][1] - bordBassin[0][1])
 
@@ -327,18 +327,52 @@ def getCap(corners1, ids1):
     return (angle)
 
 
+def drawPoint(frame,pts):
+    """
+    a : point a (coordonées en M)
+    b : point b (coordonées en M)
+    frame : frame sur laquelle il faut dessiner le point
+    """
     
+    if 0 in bordBassin and 10 in bordBassin and 12 in bordBassin:
+        xPts = pts[0]*(bordBassin[12][0] - bordBassin[0][0])/3.5
+        yPts = pts[1]*(bordBassin[10][1] - bordBassin[0][1])/3
+
+        pos = np.array([[abs(xPts[0] + bordBassin[0][0])],
+                        [abs(yPts[0] + bordBassin[0][1])]])
+    
+        pos =  np.linalg.inv(getRotationMatrix(getTheta())) @ pos 
+ 
+        x = int(pos[0][0])
+        y = int(pos[1][0])
+
+        frame[x-10:x+10,y-10:y+10] = [117,222,255]
+    
+def drawBoat(frame, x,y):
+    
+    if not x is None and not y is None:
+        xBoat = x*(bordBassin[12][0] - bordBassin[0][0])/3.5
+        yBoat = y*(bordBassin[10][1] - bordBassin[0][1])/3
+        
+        pos = np.array([[abs(xBoat + bordBassin[0][0])],
+                        [abs(yBoat + bordBassin[0][1])]])
+    
+        pos =  np.linalg.inv(getRotationMatrix(getTheta())) @ pos 
+ 
+        xBoat = int(pos[0][0])
+        yBoat = int(pos[1][0])
+
+        frame[xBoat-10:xBoat+10,yBoat-10:yBoat+10] = [0,0,255]
 
 
-def run_one_step(cap1):
+def run_one_step(cap1,pts):
     
     ret1, frame1 = cap1.read()
     if ret1:
         
         corners1, ids1 = detectAruco(frame1)
         aruco.drawDetectedMarkers(frame1, corners1, ids1)
-        cv2.imshow("Webcam", frame1)
-
+        drawPoint(frame1,pts)
         
         
         if not(ids1 is None) and len(ids1)> 0 and (4 in ids1 and 5 in ids1): #le bateau est sur la cam1 ou la cam2 (ou les deux en meme temps)
@@ -347,11 +381,17 @@ def run_one_step(cap1):
                         
             xBoat, yBoat = getPosition(corners1, ids1, frame1)
             
+            drawBoat(frame1, xBoat, yBoat)
             
             
         else: #le bateau n'est sur aucune camera
             print("ERROR : No boat detected")
             return None, None, None
+        
+        cv2.imshow("Webcam", frame1)
+
+        
+
         
     else: #le bateau n'est sur aucune camera
             print("ERROR : No image")

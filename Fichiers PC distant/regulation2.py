@@ -10,7 +10,7 @@ Created on Fri May 31 18:20:05 2019
 @author: catam
 """
 
-from numpy import array, cos, sin, pi, ones, hstack, vstack, linspace, arange, arctan
+from numpy import array, cos, sin, pi, ones, hstack, vstack, linspace, arange, arctan,tanh
 from math import atan2
 import matplotlib.pyplot as plt
 from numpy.linalg import norm, det
@@ -73,7 +73,7 @@ def dCommande(X, w):
     
     rudderCommand = erreurCap + 2*derreur
     
-    motorCommand = vTarget - v
+    motorCommand = tanh(vTarget - v) #rajouter constante ???
     
     return array([[rudderCommand], [motorCommand]])
     
@@ -159,12 +159,12 @@ if __name__ == '__main__':
     # =============================================================================
     # Configuration initiale
     # =============================================================================
-    X = array([[0.5], [5], [0], [0.5], [0]])
+    X = array([[0], [2.5], [1], [0.5], [0]])
     commandes = array([[0.], [0.]])
     
     
-    Waypoints = [[0,3.5],
-                 [3,0.5]]
+    Waypoints = [[4,0.5],# ,3   ,0.5 ,0.5],
+                 [0,2.5]]# ,2.5 ,0.5 ,2.5]]
     
     for k in range(len(Waypoints[0])-1):
         a = array([[Waypoints[0][k]], [Waypoints[1][k]]])
@@ -174,8 +174,8 @@ if __name__ == '__main__':
                 
                
             plt.cla()
-            plt.xlim((-15, 15))
-            plt.ylim((-15, 15))
+            plt.xlim((0, 4))
+            plt.ylim((0, 3))
             plt.gca().set_aspect('equal', adjustable='box')
             
             commandes = getCommande(X, a, b, vTarget, commandes)

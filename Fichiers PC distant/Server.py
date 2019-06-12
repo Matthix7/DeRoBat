@@ -98,11 +98,7 @@ Z_Cont = []
 while alive.is_set():
     X, Y, Z, xBoat, yBoat = thread_listening.toMap()
     
-#    if not xBoat is None and xBoat != 0 and yBoat != 0 and xBoat != -1 and yBoat != -1:
-#        traceX.append(xBoat)
-#        traceY.append(yBoat)
-#    
-#    X = []
+        
     if X != []:
         #Représentation 3D en 2D
         #bathy 3d avec scatter couleur entre -3 et 0 m
@@ -139,7 +135,7 @@ while alive.is_set():
             ax.yaxis.tick_right()
 
             nbPlot = 0           
-            print("-----------------Update Bathymetrie----------------")
+            print("-------------Update Bathymetrie------------")
             
             pas = 1/5
             ZCont = -3*np.ones((int(4/pas), int(3/pas)))
@@ -157,14 +153,7 @@ while alive.is_set():
         plt.pause(2)
 
             
-            
-#    time.sleep(0.1)
-
-                 
-#plt.plot(traceY, traceX, marker = 'x', color = 'red')
-#print(traceY)
-
-
+    
 # Attend que les threads se terminent
 thread_listening.join()
 

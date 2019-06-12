@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from numpy import pi, cos, sin
 
-
 class Map(Thread):
     """Utilisation du fichier mesures.txt pour générer l'affichage 3D du fond.
     On récupère environ 10 valeurs du sonar par seconde dans mesures.txt,
@@ -34,12 +33,9 @@ class Map(Thread):
         self.Xcopy, self.Ycopy, self.Zcopy = [], [], []
         self.mapLock = False
         
-        self.offset_sonar = 0
+        self.offset_sonar = 0 #### Remplacer par la valeur rendu par getOffset.py
         
-    def offsetSonar(self,Z=[]):
-        print("---------Reglage offset Sonar-----------")
-        print("      Laisser le bateau imobile")
-        Z = [val for val in Z if val != -1]
+        
     
     def toMap(self):
         return self.mapLock, self.Xcopy, self.Ycopy, self.Zcopy, self.xBoat, self.yBoat
@@ -85,6 +81,7 @@ class Map(Thread):
                 
                 #Copie dans un autre fichier, exploitable sans risque de pertes.
 #                self.test = open("testFile.txt", 'a')
+                    
                 self.mapLock = True
                 for line in measures:
 #                    self.test.write(line)
@@ -92,11 +89,19 @@ class Map(Thread):
                     #On récupère les valeurs pour plot
                     mes = eval(line)
                     x, y, cap, sonde, angle_sonde = mes[0], mes[1], mes[2], mes[3], 2*pi*mes[4]/360
-                    
+#                    print("Sonde, Angle Sonde : ", sonde, math.degrees(angle_sonde))
+#                    if self.initSonar:
+#                        self.sonde.append(sonde)
+#                        self.angle_sonde.append(angle_sonde)
+
                     angle_sonde = pi/2 + angle_sonde - self.offset_sonar*2*pi/360
                     xPoint = x+sin(cap)*sonde*sin(angle_sonde)
                     yPoint = y-cos(cap)*sonde*sin(angle_sonde)
                     zPoint = sonde*cos(angle_sonde)
+                    
+
+                
+
                     
                     if sonde > 0.3 and x >0 and y>0 and xPoint>0 and xPoint<4 and yPoint>0 and yPoint<3 and zPoint<=0:
                         
