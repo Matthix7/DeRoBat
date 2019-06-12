@@ -6,6 +6,7 @@ Created on Tue Jun 11 17:05:33 2019
 """
 import cv2
 import cv2.aruco as aruco
+from calibrate_camera import calibration, undistort
 
 def resizeFrame(frame):
     """
@@ -40,6 +41,8 @@ def detectAruco(image):#return aruco's position and id
     corners, ids, rejectedImgPoints = aruco.detectMarkers(image, aruco_dict, parameters=parameters)
 
     return corners, ids
+
+newcameramtx, roi, mtx, dist =  calibration()
 cap = cv2.VideoCapture()
 cap.open('http://root:1234@169.254.236.203/mjpg/video.mjpg')
 
@@ -50,9 +53,11 @@ while(True):
     ret, frame = cap.read()
     corner, ids = detectAruco(frame)
     aruco.drawDetectedMarkers(frame, corner, ids)
+    frame = undistort(frame, newcameramtx, roi, mtx, dist)
+
     
     cv2.imshow("Webcam", resizeFrame(frame))
-    if key == ord('q'):
+    if key == 27:
         break
 
 cap.release()

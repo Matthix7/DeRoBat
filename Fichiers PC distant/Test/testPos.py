@@ -170,7 +170,7 @@ while(True):
         frame[int(x-10):int(x+10), int(y-10):int(y+10)] = [0,0,255]
     cv2.imshow('Arcuo', resizeFrame(frame))
 
-    if key == ord('q'):
+    if key == 27:
         break
 
 cap.release()

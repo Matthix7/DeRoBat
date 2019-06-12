@@ -8,6 +8,8 @@ from threading import Thread
 from regulation2 import getCommande
 from numpy.linalg import norm
 
+from calibrate_camera import calibration, undistort
+
 
 bordBassin = dict() #pour la position des aruco sur le bord
 
@@ -28,6 +30,10 @@ class Cam(Thread):
         self.message = str((-1,-1,-1,0,0)) 
         self.commande = (1090,2000)
         
+        print('Calibration running...')
+        self.newcameramtx, self.roi, self.mtx, self.dist =  calibration()
+        
+        
         
 
     def getMessage(self):
@@ -41,7 +47,6 @@ class Cam(Thread):
     
     
     def run(self):
-        print('Calibration running...')
         cv2.namedWindow('Webcam', cv2.WINDOW_NORMAL)
 
         cap1 = cv2.VideoCapture()
@@ -70,7 +75,7 @@ class Cam(Thread):
         print('Acquisition running...')
         while(cap1.isOpened()) and ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
             
-            xBoat, yBoat,theta = run_one_step(cap1,b)
+            xBoat, yBoat,theta = run_one_step(cap1,b,self.newcameramtx, self.roi, self.mtx, self.dist)
 
             
 # =============================================================================
@@ -365,13 +370,14 @@ def drawBoat(frame, x,y):
         frame[xBoat-10:xBoat+10,yBoat-10:yBoat+10] = [0,0,255]
 
 
-def run_one_step(cap1,pts):
+def run_one_step(cap1,pts, newcameramtx, roi, mtx, dist):
     
     ret1, frame1 = cap1.read()
     if ret1:
         
         corners1, ids1 = detectAruco(frame1)
         aruco.drawDetectedMarkers(frame1, corners1, ids1)
+        frame1 = undistort(frame1, newcameramtx, roi, mtx, dist)
         drawPoint(frame1,pts)
         
         
