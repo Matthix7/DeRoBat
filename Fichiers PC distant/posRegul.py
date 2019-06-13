@@ -56,8 +56,8 @@ class Cam(Thread):
         neutreServo, neutreMoteur = 1090, 2000
         commandes = np.array([[neutreServo], [neutreMoteur]])
         
-        Waypoints = [[4,0],# ,3   ,0.5 ,0.5],
-                     [0,3]]# ,2.5 ,0.5 ,2.5]]
+        Waypoints = [[0,3],# ,3   ,0.5 ,0.5], #X
+                     [3,1]]# ,2.5 ,0.5 ,2.5]] #Y
     
         for k in range(len(Waypoints[0])-1):
             a = np.array([[Waypoints[0][k]], [Waypoints[1][k]]])
@@ -98,6 +98,9 @@ class Cam(Thread):
                     self.commande = (175*commandes[0,0]+neutreServo, (390*abs(commandes[1,0])+31) + 3000)
             
                 self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
+            elif xBoat is None:
+                self.commande = (neutreServo, neutreMoteur) #on arrete le bateau si on ne le voit pas 
+
 # =============================================================================
 #             Expédition des données utiles en aval
 # =============================================================================
@@ -373,12 +376,13 @@ def drawBoat(frame, x,y):
 def run_one_step(cap1,pts, newcameramtx, roi, mtx, dist):
     
     ret1, frame1 = cap1.read()
+    frame1 = undistort(frame1, newcameramtx, roi, mtx, dist)
+
     if ret1:
-        
         corners1, ids1 = detectAruco(frame1)
         aruco.drawDetectedMarkers(frame1, corners1, ids1)
-        frame1 = undistort(frame1, newcameramtx, roi, mtx, dist)
         drawPoint(frame1,pts)
+
         
         
         if not(ids1 is None) and len(ids1)> 0 and (4 in ids1 and 5 in ids1): #le bateau est sur la cam1 ou la cam2 (ou les deux en meme temps)
@@ -392,6 +396,7 @@ def run_one_step(cap1,pts, newcameramtx, roi, mtx, dist):
             
         else: #le bateau n'est sur aucune camera
             print("ERROR : No boat detected")
+            print("bordBasssin = ", bordBassin)
             return None, None, None
         
         cv2.imshow("Webcam", frame1)

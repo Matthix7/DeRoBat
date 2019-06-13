@@ -22,10 +22,18 @@ def plot():
     ax.yaxis.tick_right()
     
     ax.add_artist(
-        patches.Rectangle((0, 0), 3, 4,
-                          edgecolor = [0,0,1], facecolor = [0,0,1],
-                          fill = True))
-
+            patches.Rectangle((2.9, 0), 0.1, 0.1,
+                              edgecolor = [1,0,0], facecolor = [1,0,0],
+                              fill = True))
+    
+    ax.add_artist(
+            patches.Rectangle((0, 0), 0.1, 0.1,
+                              edgecolor = [0,1,0], facecolor = [0,1,0],
+                              fill = True))
+    ax.add_artist(
+            patches.Rectangle((0, 3.9), 0.1, 0.1,
+                              edgecolor = [0,0,1], facecolor = [0,0,1],
+                              fill = True))
 def openCV():
     x = 0
     y = 500
@@ -39,4 +47,4 @@ def openCV():
     
     
 if __name__ == "__main__":
-    openCV()
+    plot()

@@ -10,7 +10,7 @@ Created on Fri May 31 18:20:05 2019
 @author: catam
 """
 
-from numpy import array, cos, sin, pi, ones, hstack, vstack, linspace, arange, arctan,tanh
+from numpy import array, cos, sin, pi, ones, hstack, vstack, arctan,tanh
 from math import atan2
 import matplotlib.pyplot as plt
 from numpy.linalg import norm, det
@@ -28,7 +28,6 @@ dt = 0.5
 
 # =============================================================================
 # Consignes
-vTarget = 0.5
 
 # =============================================================================
 
@@ -73,7 +72,7 @@ def dCommande(X, w):
     
     rudderCommand = erreurCap + 2*derreur
     
-    motorCommand = tanh(vTarget - v) #rajouter constante ???
+    motorCommand = 0.1*tanh(vTarget - v) #rajouter constante ???
     
     return array([[rudderCommand], [motorCommand]])
     
@@ -155,6 +154,8 @@ def draw_boat(x, size = 0.1):
 if __name__ == '__main__':
 
     plt.figure()
+    vTarget = 0.5
+
     
     # =============================================================================
     # Configuration initiale

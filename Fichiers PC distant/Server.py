@@ -21,6 +21,7 @@ from Thread_Server_Writing import *
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib as mpl
+from matplotlib import patches
 
 import scipy.stats
 import numpy as np
@@ -68,6 +69,20 @@ plt.gca().set_aspect('equal', adjustable = 'box')
 plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
 ax.yaxis.tick_right()
 
+ax.add_artist(
+        patches.Rectangle((2.9, 0), 0.1, 0.1,
+                          edgecolor = [1,0,0], facecolor = [1,0,0],
+                          fill = True))
+
+ax.add_artist(
+        patches.Rectangle((0, 0), 0.1, 0.1,
+                          edgecolor = [0,1,0], facecolor = [0,1,0],
+                          fill = True))
+ax.add_artist(
+        patches.Rectangle((0, 3.9), 0.1, 0.1,
+                          edgecolor = [0,0,1], facecolor = [0,0,1],
+                          fill = True))
+
 nbPlot = 0 #contient le nombre de plot fait sur le scatter
 
 #------------------------------------------------------------
@@ -78,7 +93,7 @@ figCont = plt.figure(1)
 plt.title("Représentation globale du bassin")
 Z = [[0,0],[0,0]]
 levels = np.arange(min,max+step,step)
-Cont = plt.contourf(Z, levels, cmap=mymap)
+Cont = plt.contourf(Z, levels, cmap="viridis")
 plt.clf()
 
 ax = figCont.add_subplot(111)
@@ -87,6 +102,21 @@ plt.colorbar(Cont, orientation = "horizontal")
 plt.gca().set_aspect('equal', adjustable = 'box')
 plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
 ax.yaxis.tick_right()
+
+ax.add_artist(
+        patches.Rectangle((2.9, 0), 0.1, 0.1,
+                          edgecolor = [1,0,0], facecolor = [1,0,0],
+                          fill = True))
+
+ax.add_artist(
+        patches.Rectangle((0, 0), 0.1, 0.1,
+                          edgecolor = [0,1,0], facecolor = [0,1,0],
+                          fill = True))
+ax.add_artist(
+        patches.Rectangle((0, 3.9), 0.1, 0.1,
+                          edgecolor = [0,0,1], facecolor = [0,0,1],
+                          fill = True))
+
 
 
 X_Cont = [] #stockage des valeurs de x,y,z
@@ -122,8 +152,8 @@ while alive.is_set():
         
             
         nbPlot += 1
-        if nbPlot >= 10:
-            print("-----------------CLEAR AXES----------------")
+        if nbPlot >= 20:
+            print("-----------------Clear Axes----------------")
             plt.figure(0)
             plt.cla()
             plt.title("Représentation locale du bassin")
@@ -137,7 +167,7 @@ while alive.is_set():
             nbPlot = 0           
             print("-------------Update Bathymetrie------------")
             
-            pas = 1/5
+            pas = 1/10
             ZCont = -3*np.ones((int(4/pas), int(3/pas)))
             XCont = np.linspace(0,3,np.shape(ZCont)[1])
             YCont = np.linspace(0,4,np.shape(ZCont)[0])               
@@ -147,7 +177,8 @@ while alive.is_set():
                 ZCont[int(Y_Cont[ind]/pas)][int(X_Cont[ind]/pas)] = np.mean([ZCont[int(Y_Cont[ind]/pas)][int(X_Cont[ind]/pas)], Z_Cont[ind]])
          
             plt.figure(1)
-            Cont = plt.contourf(XCont, YCont, ZCont, levels = levels, cmap=mymap)
+            plt.title("Représentation globale du bassin")
+            Cont = plt.contourf(XCont, YCont, ZCont, levels = levels, cmap="viridis")
             plt.draw()
             
         plt.pause(2)

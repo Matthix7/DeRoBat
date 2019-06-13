@@ -8,6 +8,8 @@ import cv2
 import cv2.aruco as aruco
 import math
 import numpy as np
+from calibrate_camera import calibration, undistort
+
 bordBassin = dict() #pour la position des aruco sur le bord
 
 def resizeFrame(frame):
@@ -107,7 +109,7 @@ def getPositionNoCalib(corners1, ids1, frame1):
     
 #------ On recupère la position du bateau -------
     
-    i,j = np.where(ids1 == 5)
+    i,j = np.where(ids1 == 4)
     if len(i) == 0:
         return None,None
     cornerBoat5 = corners1[i[0]][j[0]]
@@ -143,7 +145,7 @@ def getPositionNoCalib(corners1, ids1, frame1):
     
 
 
-
+newcameramtx, roi, mtx, dist =  calibration()
 cap = cv2.VideoCapture()
 cap.open('http://root:1234@169.254.236.203/mjpg/video.mjpg')
 
@@ -154,21 +156,25 @@ while(True):
     ret, frame = cap.read()
     corner, ids = detectAruco(frame)
     aruco.drawDetectedMarkers(frame, corner, ids)
+    xnc, ync = getPositionNoCalib(corner,ids,frame)
+
+    frameC = undistort(frame, newcameramtx, roi, mtx, dist)
     
     
-    x, y = getPositionNoCalib(corner,ids,frame)
-    if not x is None:
+    if not xnc is None:
         print("--------Draw Boat--------")
-        print(x,y)
-        pos = np.array([[abs(x + bordBassin[0][0])],
-                        [abs(y + bordBassin[0][1])]])
+        print(xnc,ync)
+        pos = np.array([[abs(xnc + bordBassin[0][0])],
+                        [abs(ync + bordBassin[0][1])]])
     
         pos =  np.linalg.inv(getRotationMatrix(getTheta())) @ pos 
  
-        x = pos [0][0]
-        y = pos[1][0]
-        frame[int(x-10):int(x+10), int(y-10):int(y+10)] = [0,0,255]
-    cv2.imshow('Arcuo', resizeFrame(frame))
+        xnc = pos [0][0]
+        ync = pos[1][0]
+        frame[int(xnc-10):int(xnc+10), int(ync-10):int(ync+10)] = [0,0,255]
+    cv2.imshow('Frame No Calib', resizeFrame(frame))
+    cv2.imshow('Frame Calib', resizeFrame(frameC))
+
 
     if key == 27:
         break

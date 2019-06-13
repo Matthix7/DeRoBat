@@ -6,8 +6,7 @@ Created on Wed Jun  5 10:26:18 2019
 """
 import cv2
 import cv2.aruco as aruco
-from calibrate_fisheye import * 
-import cv2.fisheye as fisheye
+from calibrate_camera import calibration, undistort
 import numpy as np
 import math
 import matplotlib.pyplot as plt
@@ -60,64 +59,6 @@ def getArucoCenter(corner):
     
     return x,y
 
-def undistorted(corner,K,D):
-    """
-    corner : position du code Aruco dans l'image
-    
-    Return:
-        Point central de l'Aruco après calibration
-    """
-    
-    input_points = np.zeros([1,1,2])
-            
-    x,y = getArucoCenter(corner)
-    
-    input_points[0,0,0] = x
-    input_points[0,0,1] = y
-    
-    undistorted = fisheye.undistortPoints(input_points,K,D, R=None, P=K)
-    
-    return undistorted.reshape(1,2)[0,0], undistorted.reshape(1,2)[0,1]
-
-
-def getBordBassin(corners1, ids1):
-    #------ On recupère le bords du bassin ---------
-        
-    if not(ids1 is None) and len(ids1) > 0: 
-        for id in ids1:
-            if id != 4 and id != 5:
-                
-                i,j = np.where(ids1 == id)
-                
-                cornerBassin = corners1[i[0]][j[0]]
-                
-                xBassin, yBassin = undistorted(cornerBassin, K,D)
-                
-#                xBassin, yBassin = getArucoCenter(cornerBassin)
-                            
-                bordBassin[id[0]] = xBassin,yBassin
-                
-    #------------------------------------------------
-
-def getBordBassinNoCalib(corners1, ids1):
-    #------ On recupère le bords du bassin ---------
-        
-    if not(ids1 is None) and len(ids1) > 0: 
-        for id in ids1:
-            if id != 4 and id != 5:
-                
-                i,j = np.where(ids1 == id)
-                
-                cornerBassin = corners1[i[0]][j[0]]
-                
-#                xBassin, yBassin = undistorted(cornerBassin, K,D)
-                
-                xBassin, yBassin = getArucoCenter(cornerBassin)
-                            
-                bordBassin[id[0]] = xBassin,yBassin
-
-
-
 def getTheta():
     """
     Return:
@@ -137,8 +78,33 @@ def getRotationMatrix(theta):
 
 
 
+def getBordBassin(corners1, ids1):
+    """
+    corners1 : Corner de la frame
+    ids1 : id de la frame
+    
+    -> Met bordBassin à jour avec les arucos (sauf 4 et 5)
+    """
+    #------ On recupère le bords du bassin ---------
+        
+    if not(ids1 is None) and len(ids1) > 0: 
+        for id in ids1:
+            if id != 4 and id != 5:
+                
+                i,j = np.where(ids1 == id)
+                
+                cornerBassin = corners1[i[0]][j[0]]
+                
+#                xBassin, yBassin = undistorted(cornerBassin, K,D)
+                
+                xBassin, yBassin = getArucoCenter(cornerBassin)
+                            
+                bordBassin[id[0]] = xBassin,yBassin
 
-def getPosition(corners1, ids1, frame1, K, D):
+
+
+
+def getPosition(corners1, ids1, frame1):
     
     """
     corners1 : Corners frame Cam 1
@@ -147,31 +113,28 @@ def getPosition(corners1, ids1, frame1, K, D):
     
     Return:
         xBoat: position en X du bateau
-        yBoat: position en Y du bateau (il est inversé ?)
+        yBoat: position en Y du bateau
     """
     
-    getBordBassin(corner, ids)
-
-#------ On recupère la position du bateau -------
+    getBordBassin(corners1, ids1)  
+    x, y = None, None
+    i,j = [],[]
+    #------ On recupère la position du bateau -------
+    if not ids1 is None and 4 in ids1:
     
-    i,j = np.where(ids1 == 5)
-    if len(i) == 0:
-        return None,None
-    cornerBoat5 = corners1[i[0]][j[0]]
+        i,j = np.where(ids1 == 4)
     
-    #x4,y4 = getArucoCenter(cornerBoat4)
-
-    x5, y5 = undistorted(cornerBoat5,K,D)
-
-    #x5,y5 = getArucoCenter(cornerBoat5)
-    
-    x = x5
-    y = y5 
- 
-
+    if len(i) > 0:
+        
+        cornerBoat4 = corners1[i[0]][j[0]]
+        
+        x4,y4 = getArucoCenter(cornerBoat4)
+        
+        x = x4 
+        y = y4
     
 #--- On ajuste la position du bateau au bassin ---
-    if len(bordBassin) > 1:
+    if 0 in bordBassin and 10 in bordBassin and 12 in bordBassin and not x is None:
         
         pos = np.array([[abs(x - bordBassin[0][0])],
                         [abs(y - bordBassin[0][1])]])
@@ -179,70 +142,47 @@ def getPosition(corners1, ids1, frame1, K, D):
     
         pos = getRotationMatrix(getTheta()) @ pos
         
-        xBoat = pos[0][0]
-        yBoat = pos[1][0]
+        
+        xBoat = pos[0][0] * 3.5/(bordBassin[12][0] - bordBassin[0][0])
+        yBoat = pos[1][0] * 3/(bordBassin[10][1] - bordBassin[0][1])
 
     else:
         xBoat,yBoat = None,None
-
 
 #-------------------------------------------------
 
-        
-        
-    
     return xBoat, yBoat
 
-def getPositionNoCalib(corners1, ids1, frame1):
-    
+
+
+
+
+def getCap(corners1, ids1):
     """
-    corners1 : Corners frame Cam 1
-    ids1 : Ids Frame Cam 1
-    frame1 : Frame Cam 1
+    corners1 : Corners Arucos du bateau
+    ids1 : Ids Arucos du Bateau
     
     Return:
-        xBoat: position en X du bateau
-        yBoat: position en Y du bateau (il est inversé ?)
+        angle : cap en radians 
     """
+    angle = math.nan
+    if 0 in bordBassin and 10 in bordBassin:
     
-    getBordBassinNoCalib(corners1,ids1)
+        i1,j1 = np.where(ids1 == 4)
+        i2,j2 = np.where(ids1 == 5)
     
-#------ On recupère la position du bateau -------
-    
-    i,j = np.where(ids1 == 5)
-    if len(i) == 0:
-        return None,None
-    cornerBoat5 = corners1[i[0]][j[0]]
-    
-    #x4,y4 = getArucoCenter(cornerBoat4)
-
-
-    x5,y5 = getArucoCenter(cornerBoat5)
+        arucoBoat1 = corners1[i1[0]][j1[0]]
+        xAr4, yAr4 = getArucoCenter(arucoBoat1)
         
-    x = x5
-    y = y5 
-
+        arucoBoat2 = corners1[i2[0]][j2[0]]  
+        xAr5, yAr5 = getArucoCenter(arucoBoat2)
+            
+        angle = math.atan2( yAr5-yAr4, xAr5-xAr4 ) - getTheta()
     
-    if len(bordBassin) > 1:
-        
-        pos = np.array([[abs(x - bordBassin[0][0])],
-                        [abs(y - bordBassin[0][1])]])
-    
-    
-        pos = getRotationMatrix(getTheta()) @ pos
-        
-        xBoat = pos[0][0]
-        yBoat = pos[1][0]
-
-    else:
-        xBoat,yBoat = None,None
-
- 
-    return xBoat,yBoat
-
+    return (angle)
     
 
-
+newcameramtx, roi, mtx, dist =  calibration()
 cap = cv2.VideoCapture()
 cap.open('http://root:1234@169.254.236.203/mjpg/video.mjpg')
 print("Acquisition running...")
@@ -254,6 +194,8 @@ ax = fig.add_subplot(111)
 
 plt.xlim(-1,5)
 plt.ylim(-1,4)
+plt.xlabel('Red = No Calib, Green = Calib')
+
 plt.grid()
 
 plt.gca().set_aspect('equal', adjustable = 'box')
@@ -265,25 +207,33 @@ while(True):
     
     key = cv2.waitKey(1) & 0xFF
     
-    ret, frame = cap.read()
-    corner, ids = detectAruco(frame)
-    aruco.drawDetectedMarkers(frame, corner, ids)
+    ret, frameNC = cap.read()
+    frameC = undistort(frameNC, newcameramtx, roi, mtx, dist)
     
-    cv2.imshow('Arcuo', resizeFrame(frame))
+    cornerNC, idsNC = detectAruco(frameNC)
+    aruco.drawDetectedMarkers(frameNC, cornerNC, idsNC)
+    cornerC, idsC = detectAruco(frameC)
+    aruco.drawDetectedMarkers(frameC, cornerC, idsC)
     
-    xnc, ync = getPositionNoCalib(corner,ids,frame)
-    """
-    if x != None:
-        print(x,y,x*4/2350,y*3/(bordBassin[10][1] - bordBassin[0][1]))
+    cv2.imshow('Frame No Calib', resizeFrame(frameNC))
+    
+    cv2.imshow('Frame Calib', resizeFrame(frameC))
+    
+    xnc, ync = getPosition(cornerNC,idsNC,frameNC)
+    xc, yc = getPosition(cornerC,idsC,frameC)
+
+    if xc is None or xnc is None:
+        print("xc or xnc is None")
+        print("xc : ", xc)
+        print("xnc : ", xnc)
     else:
-        print(x,y)
-    """
-    if key == ord('s'):
-        print("acquis")
-        plt.scatter(ync*3/(bordBassin[10][1] - bordBassin[0][1]),xnc*3.50/(bordBassin[12][0]-bordBassin[0][0]), marker = 'o', c="green")
-                
-        plt.pause(2)
-    if key == ord('q'):
+
+        if key == ord('s'):
+            print("acquis")
+            plt.scatter(ync,xnc, marker = 'o', c="red")
+            plt.scatter(yc,xc, marker = 'o', c="green")
+            plt.pause(2)
+    if key == 27:
         break
 
 cap.release()
