@@ -75,7 +75,7 @@ class Cam(Thread):
         print('Acquisition running...')
         while(cap1.isOpened()) and ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
             
-            xBoat, yBoat,theta = run_one_step(cap1,b,self.newcameramtx, self.roi, self.mtx, self.dist)
+            xBoat, yBoat,theta = run_one_step(cap1,a,b,self.newcameramtx, self.roi, self.mtx, self.dist)
 
             
 # =============================================================================
@@ -104,7 +104,7 @@ class Cam(Thread):
 # =============================================================================
 #             Expédition des données utiles en aval
 # =============================================================================
-            if xBoat != None and yBoat != None and 0 in bordBassin and 10 in bordBassin and 12 in bordBassin:
+            if xBoat != None and yBoat != None:
 
                 print("X = ", xBoat, "\nY = ", yBoat, "\ntheta =", math.degrees(theta))                
                 self.message = str( (xBoat , yBoat, theta) + self.commande)
@@ -287,7 +287,7 @@ def getPosition(corners1, ids1, frame1):
     y = (y4 + y5)/2
     
 #--- On ajuste la position du bateau au bassin ---
-    if 0 in bordBassin and 10 in bordBassin and 12 in bordBassin:
+    if 0 in bordBassin and 10 in bordBassin and 1 in bordBassin:
         
         pos = np.array([[abs(x - bordBassin[0][0])],
                         [abs(y - bordBassin[0][1])]])
@@ -296,7 +296,7 @@ def getPosition(corners1, ids1, frame1):
         pos = getRotationMatrix(getTheta()) @ pos
         
         
-        xBoat = pos[0][0] * 3.5/(bordBassin[12][0] - bordBassin[0][0])
+        xBoat = pos[0][0] * 3.5/(bordBassin[1][0] - bordBassin[0][0])
         yBoat = pos[1][0] * 3/(bordBassin[10][1] - bordBassin[0][1])
 
     else:
@@ -337,13 +337,12 @@ def getCap(corners1, ids1):
 
 def drawPoint(frame,pts):
     """
-    a : point a (coordonées en M)
-    b : point b (coordonées en M)
+    pts : point à dessiner (coordonées en M)
     frame : frame sur laquelle il faut dessiner le point
     """
     
-    if 0 in bordBassin and 10 in bordBassin and 12 in bordBassin:
-        xPts = pts[0]*(bordBassin[12][0] - bordBassin[0][0])/3.5
+    if 0 in bordBassin and 10 in bordBassin and 1 in bordBassin:
+        xPts = pts[0]*(bordBassin[1][0] - bordBassin[0][0])/3.5
         yPts = pts[1]*(bordBassin[10][1] - bordBassin[0][1])/3
 
         pos = np.array([[abs(xPts[0] + bordBassin[0][0])],
@@ -355,11 +354,22 @@ def drawPoint(frame,pts):
         y = int(pos[1][0])
 
         frame[x-10:x+10,y-10:y+10] = [117,222,255]
+
+def drawLine(frame,a,b):
+    """
+    a : point a (coordonées en M)
+    b : point b (coordonées en M)
+    frame : frame sur laquelle il faut dessiner la ligne
+    """
+    
+    
+    
+    
     
 def drawBoat(frame, x,y):
     
     if not x is None and not y is None:
-        xBoat = x*(bordBassin[12][0] - bordBassin[0][0])/3.5
+        xBoat = x*(bordBassin[1][0] - bordBassin[0][0])/3.5
         yBoat = y*(bordBassin[10][1] - bordBassin[0][1])/3
         
         pos = np.array([[abs(xBoat + bordBassin[0][0])],
@@ -373,7 +383,7 @@ def drawBoat(frame, x,y):
         frame[xBoat-10:xBoat+10,yBoat-10:yBoat+10] = [0,0,255]
 
 
-def run_one_step(cap1,pts, newcameramtx, roi, mtx, dist):
+def run_one_step(cap1,a,b, newcameramtx, roi, mtx, dist):
     
     ret1, frame1 = cap1.read()
     frame1 = undistort(frame1, newcameramtx, roi, mtx, dist)
@@ -381,7 +391,9 @@ def run_one_step(cap1,pts, newcameramtx, roi, mtx, dist):
     if ret1:
         corners1, ids1 = detectAruco(frame1)
         aruco.drawDetectedMarkers(frame1, corners1, ids1)
-        drawPoint(frame1,pts)
+        drawPoint(frame1,a)
+        drawPoint(frame1,b)
+
 
         
         
@@ -397,6 +409,8 @@ def run_one_step(cap1,pts, newcameramtx, roi, mtx, dist):
         else: #le bateau n'est sur aucune camera
             print("ERROR : No boat detected")
             print("bordBasssin = ", bordBassin)
+            cv2.imshow("Webcam", frame1)
+
             return None, None, None
         
         cv2.imshow("Webcam", frame1)
