@@ -44,7 +44,7 @@ thread_listening.start()
 #------------- Init pour l'affichage de le Scatter-------------
 ###############################################################
 figScat = plt.figure(0)
-plt.title("Représentation locale du bassin ")
+plt.title("Représentation locale du bassin")
 
 min, max = (-3, 0) #max and min for the colorbar (in meters)
 step = 0.01

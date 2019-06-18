@@ -15,14 +15,17 @@ bordBassin = dict() #pour la position des aruco sur le bord
 distAr0Ar1 = 3.5 #distance entre l'aruco 0 et 1 (axe des X)
 distAr0Ar10 = 3 #distance entre l'aruco 0 et 10 (axe des Y)
 
+
 ############# #Check adresse avec IPUtility #################################
 #############################################################################
 adressCam1 = 'http://root:1234@169.254.236.203/mjpg/video.mjpg'   
 adressCam2 = 'http://root:1234@169.254.206.22/mjpg/video.mjpg'   
-adressCam3 = 'http://root:1234@169.254.206.22/mjpg/video.mjpg' #A Modifier   
+adressCam3 = 'http://root:1234@169.254.234.41/mjpg/video.mjpg'    
 
 #############################################################################
 #############################################################################
+
+oldCap = 1 #Camera d'ou provient la video (pour l'optimisation)
 
 class Cam(Thread):
     """Acquisition d'images et extraction de la pose du bateau."""
@@ -300,7 +303,7 @@ def getDistCam3():
     dist entre 0 et 2
     """
     
-    return abs(getDistCam2() - bordBassin[str(2)][0]) 
+    return getDistCam2() + abs(bordBassin[1][0] - bordBassin[str(2)][0])
 
 
 def getPositionCam1(corners1, ids1, frame1):
@@ -442,6 +445,7 @@ def getPositionCam3(corners3, ids3, frame3):
     #--- On ajuste la position du bateau dans le bassin de la camera au bassin en général ---
 
         pos[0][0] = pos[0][0] + getDistCam3()
+        print("-----DIST-----",getDistCam2(), getDistCam3())
         
         xBoat = pos[0][0] * distAr0Ar1/(bordBassin[str(1)][0] - bordBassin[0][0])
         yBoat = pos[1][0] * distAr0Ar10/(bordBassin[10][1] - bordBassin[0][1])
@@ -467,18 +471,17 @@ def getCap(corners1, ids1, theta):
         angle : cap en radians 
     """
     angle = math.nan
-    if 0 in bordBassin and 10 in bordBassin:
+
+    i1,j1 = np.where(ids1 == 4)
+    i2,j2 = np.where(ids1 == 5)
+
+    arucoBoat1 = corners1[i1[0]][j1[0]]
+    xAr4, yAr4 = getArucoCenter(arucoBoat1)
     
-        i1,j1 = np.where(ids1 == 4)
-        i2,j2 = np.where(ids1 == 5)
-    
-        arucoBoat1 = corners1[i1[0]][j1[0]]
-        xAr4, yAr4 = getArucoCenter(arucoBoat1)
+    arucoBoat2 = corners1[i2[0]][j2[0]]
+    xAr5, yAr5 = getArucoCenter(arucoBoat2)
         
-        arucoBoat2 = corners1[i2[0]][j2[0]]  
-        xAr5, yAr5 = getArucoCenter(arucoBoat2)
-            
-        angle = math.atan2( yAr5-yAr4, xAr5-xAr4 ) - theta
+    angle = math.atan2( yAr5-yAr4, xAr5-xAr4 ) - theta
     
     return (angle)
 
@@ -519,49 +522,154 @@ def drawBoat(frame, x,y):
     if not x is None and not y is None:
         frame[int(x-10):int(x+10),int(y-10):int(y+10)] = [0,0,255]
 
-def chooseCap(newcameramtx, roi, mtx, dist):
+def chooseCap(newcameramtx, roi, mtx, dist, oldCap, x):
     """
+    mise en place d'un oldCap pour optimiser le temps de compilation
+    /!\ Ouvrir et fermer des cap prends bcp de temps /!\
+    Ne va laguer que lors du changment de caméra
     renvoie le cap qui a le bateau sur son image
     """
-    cap1 = cv2.VideoCapture()
-    cap1.open(adressCam1)
-    
-    ret1, frame1 = cap1.read()
-    frame1 = undistort(frame1, newcameramtx, roi, mtx, dist)
-    corners1, ids1 = detectAruco(frame1)
-    cap1.release()
-    if 4 in ids1 and 5 in ids1:
-        return frame1, corners1, ids1, 1
 
-    cap2 = cv2.VideoCapture()
-    cap2.open(adressCam2) 
-    
-    ret2, frame2 = cap2.read()
-    frame2 = undistort(frame2, newcameramtx, roi, mtx, dist)
-    corners2, ids2 = detectAruco(frame2)
-    cap2.release()
-    if 4 in ids2 and 5 in ids2:
-        return frame2, corners2, ids2, 2
+    if oldCap == 1:
+        cap1 = cv2.VideoCapture()
+        cap1.open(adressCam1)
+        
+        ret1, frame1 = cap1.read()
+        frame1 = undistort(frame1, newcameramtx, roi, mtx, dist)
+        corners1, ids1 = detectAruco(frame1)
+        cap1.release()
+        if 4 in ids1 and 5 in ids1:
+            return frame1, corners1, ids1, 1
+        
+        cap2 = cv2.VideoCapture()
+        cap2.open(adressCam2)
+        
+        ret2, frame2 = cap2.read()
+        frame2 = undistort(frame2, newcameramtx, roi, mtx, dist)
+        corners2, ids2 = detectAruco(frame2)
+        cap2.release()
+        if 4 in ids2 and 5 in ids2:
+            return frame2, corners2, ids2, 2
+        
+        cap3 = cv2.VideoCapture()
+        cap3.open(adressCam3) 
+        
+        ret3, frame3 = cap3.read()
+        frame3 = undistort(frame3, newcameramtx, roi, mtx, dist)
+        corners3, ids3 = detectAruco(frame3)
+        cap3.release()
+        if 4 in ids3 and 5 in ids3:
+            return frame3, corners3, ids3, 3
 
 
-    cap3 = cv2.VideoCapture()
-    cap3.open(adressCam3) 
+                
+    elif oldCap == 2:
+
+        if x <= bordBassin[str(1)][0] :
+            cap1 = cv2.VideoCapture()
+            cap1.open(adressCam1)
+            
+            ret1, frame1 = cap1.read()
+            frame1 = undistort(frame1, newcameramtx, roi, mtx, dist)
+            corners1, ids1 = detectAruco(frame1)
+            cap1.release()
+            if 4 in ids1 and 5 in ids1:
+                return frame1, corners1, ids1, 1
+
+            
+        cap2 = cv2.VideoCapture()
+        cap2.open(adressCam2) 
+        
+        ret2, frame2 = cap2.read()
+        frame2 = undistort(frame2, newcameramtx, roi, mtx, dist)
+        corners2, ids2 = detectAruco(frame2)
+        cap2.release()
+        if 4 in ids2 and 5 in ids2:
+            return frame2, corners2, ids2, 2
+        
+        cap3 = cv2.VideoCapture()
+        cap3.open(adressCam3) 
+        
+        ret3, frame3 = cap3.read()
+        frame3 = undistort(frame3, newcameramtx, roi, mtx, dist)
+        corners3, ids3 = detectAruco(frame3)
+        cap3.release()
+        if 4 in ids3 and 5 in ids3:
+            return frame3, corners3, ids3, 3
+        
+        #on ne l'atteint jamais ???
+        cap1 = cv2.VideoCapture()
+        cap1.open(adressCam1)
+        
+        ret1, frame1 = cap1.read()
+        frame1 = undistort(frame1, newcameramtx, roi, mtx, dist)
+        corners1, ids1 = detectAruco(frame1)
+        cap1.release()
+        if 4 in ids1 and 5 in ids1:
+            return frame1, corners1, ids1, 1
+
+
+        
+
+    elif oldCap == 3:
+        
+        if x <= bordBassin[str(2)][0] :
+            cap2 = cv2.VideoCapture()
+            cap2.open(adressCam2) 
+            
+            ret2, frame2 = cap2.read()
+            frame2 = undistort(frame2, newcameramtx, roi, mtx, dist)
+            corners2, ids2 = detectAruco(frame2)
+            cap2.release()
+            if 4 in ids2 and 5 in ids2:
+                return frame2, corners2, ids2, 2
+
+        cap3 = cv2.VideoCapture()
+        cap3.open(adressCam3) 
+        
+        ret3, frame3 = cap3.read()
+        frame3 = undistort(frame3, newcameramtx, roi, mtx, dist)
+        corners3, ids3 = detectAruco(frame3)
+        cap3.release()
+        if 4 in ids3 and 5 in ids3:
+            return frame3, corners3, ids3, 3
+        
+        cap2 = cv2.VideoCapture()
+        cap2.open(adressCam2) 
+        
+        ret2, frame2 = cap2.read()
+        frame2 = undistort(frame2, newcameramtx, roi, mtx, dist)
+        corners2, ids2 = detectAruco(frame2)
+        cap2.release()
+        if 4 in ids2 and 5 in ids2:
+            return frame2, corners2, ids2, 2
+        
+        cap1 = cv2.VideoCapture()
+        cap1.open(adressCam1)
+        
+        ret1, frame1 = cap1.read()
+        frame1 = undistort(frame1, newcameramtx, roi, mtx, dist)
+        corners1, ids1 = detectAruco(frame1)
+        cap1.release()
+        if 4 in ids1 and 5 in ids1:
+            return frame1, corners1, ids1, 1
+
+
+
     
-    ret3, frame3 = cap3.read()
-    frame3 = undistort(frame3, newcameramtx, roi, mtx, dist)
-    corners3, ids3 = detectAruco(frame3)
-    cap3.release()
-    if 4 in ids3 and 5 in ids3:
-        return frame3, corners3, ids3, 3
    
 
     return None,None,None,None
 
-
-def run_one_step(a, b, newcameramtx, roi, mtx, dist):
-        
+def setCap(number=1):
+    global oldCap
+    oldCap = number
     
-    frame, corners, ids, number = chooseCap(newcameramtx, roi, mtx, dist)
+def run_one_step(a, b, newcameramtx, roi, mtx, dist):
+    
+    if not 'xBoat' in locals():
+        xBoat = 0
+    frame, corners, ids, number = chooseCap(newcameramtx, roi, mtx, dist, oldCap,xBoat)
     
     if frame is None:
         print("ERROR : No Boat detected")
@@ -570,6 +678,7 @@ def run_one_step(a, b, newcameramtx, roi, mtx, dist):
         
         
     if number == 1: #le bateau est sur la cam1
+        setCap(1)
         aruco.drawDetectedMarkers(frame, corners, ids)
 
         theta = getCap(corners, ids, getThetaCam1())
@@ -580,6 +689,7 @@ def run_one_step(a, b, newcameramtx, roi, mtx, dist):
         
         
     elif number == 2:#le bateau est sur la cam2
+        setCap(2)
         aruco.drawDetectedMarkers(frame, corners, ids)
 
         theta = getCap(corners, ids, getThetaCam2())
@@ -588,6 +698,7 @@ def run_one_step(a, b, newcameramtx, roi, mtx, dist):
         print("-----Webcam 2-----")
         
     elif number == 3: #le bateau est sur la cam3
+        setCap(3)
         aruco.drawDetectedMarkers(frame, corners, ids)
 
         theta = getCap(corners, ids, getThetaCam3())
