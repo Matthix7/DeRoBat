@@ -21,7 +21,7 @@ from Thread_Server_Writing import *
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib as mpl
-from matplotlib import patches
+import matplotlib.image as mpimg
 
 import scipy.stats
 import numpy as np
@@ -66,22 +66,13 @@ plt.xlim(0,3)
 plt.ylim(0,4)
 
 plt.gca().set_aspect('equal', adjustable = 'box')
-plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
-ax.yaxis.tick_right()
+#plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
+#ax.yaxis.tick_right()
 
-ax.add_artist(
-        patches.Rectangle((2.9, 0), 0.1, 0.1,
-                          edgecolor = [1,0,0], facecolor = [1,0,0],
-                          fill = True))
+img=mpimg.imread('backgroungPlot.png')
+imgplot = plt.imshow(img)
 
-ax.add_artist(
-        patches.Rectangle((0, 0), 0.1, 0.1,
-                          edgecolor = [0,1,0], facecolor = [0,1,0],
-                          fill = True))
-ax.add_artist(
-        patches.Rectangle((0, 3.9), 0.1, 0.1,
-                          edgecolor = [0,0,1], facecolor = [0,0,1],
-                          fill = True))
+
 
 nbPlot = 0 #contient le nombre de plot fait sur le scatter
 
@@ -102,22 +93,6 @@ plt.colorbar(Cont, orientation = "horizontal")
 plt.gca().set_aspect('equal', adjustable = 'box')
 plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
 ax.yaxis.tick_right()
-
-ax.add_artist(
-        patches.Rectangle((2.9, 0), 0.1, 0.1,
-                          edgecolor = [1,0,0], facecolor = [1,0,0],
-                          fill = True))
-
-ax.add_artist(
-        patches.Rectangle((0, 0), 0.1, 0.1,
-                          edgecolor = [0,1,0], facecolor = [0,1,0],
-                          fill = True))
-ax.add_artist(
-        patches.Rectangle((0, 3.9), 0.1, 0.1,
-                          edgecolor = [0,0,1], facecolor = [0,0,1],
-                          fill = True))
-
-
 
 X_Cont = [] #stockage des valeurs de x,y,z
 Y_Cont = []
@@ -161,10 +136,10 @@ while alive.is_set():
             plt.xlim(0,3)
             plt.ylim(0,4)
             plt.gca().set_aspect('equal', adjustable = 'box')
-            plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
-            ax.yaxis.tick_right()
+            img=mpimg.imread('backgroungPlot.png')
+            imgplot = plt.imshow(img)
 
-            nbPlot = 0           
+            nbPlot = 0
             print("-------------Update Bathymetrie------------")
             
             pas = 1/10

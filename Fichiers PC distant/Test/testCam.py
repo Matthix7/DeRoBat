@@ -11,7 +11,7 @@ from calibrate_camera import calibration, undistort
 
 adressCam1 = 'http://root:1234@169.254.236.203/mjpg/video.mjpg'   
 adressCam2 = 'http://root:1234@169.254.206.22/mjpg/video.mjpg'   
-adressCam3 = 'http://root:1234@169.254.236.203/mjpg/video.mjpg'   
+adressCam3 = 'http://root:1234@169.254.234.41/mjpg/video.mjpg'   
 
 def resizeFrame(frame):
     """

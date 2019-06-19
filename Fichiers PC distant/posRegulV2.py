@@ -191,25 +191,25 @@ def resizeFrame(frame):
 
 
 
-
-def undistorted(corner,K,D):
-    """
-    corner : position du code Aruco dans l'image
-    
-    Return:
-        Point central de l'Aruco après calibration
-    """
-    
-    input_points = np.zeros([1,1,2])
-            
-    x,y = getArucoCenter(corner)
-    
-    input_points[0,0,0] = x
-    input_points[0,0,1] = y
-    
-    undistorted = fisheye.undistortPoints(input_points,K,D, R=None, P=K)
-    
-    return undistorted.reshape(1,2)[0,0], undistorted.reshape(1,2)[0,1]
+#
+#def undistorted(corner,K,D):
+#    """
+#    corner : position du code Aruco dans l'image
+#    
+#    Return:
+#        Point central de l'Aruco après calibration
+#    """
+#    
+#    input_points = np.zeros([1,1,2])
+#            
+#    x,y = getArucoCenter(corner)
+#    
+#    input_points[0,0,0] = x
+#    input_points[0,0,1] = y
+#    
+#    undistorted = fisheye.undistortPoints(input_points,K,D, R=None, P=K)
+#    
+#    return undistorted.reshape(1,2)[0,0], undistorted.reshape(1,2)[0,1]
     
 
 def getThetaCam1():
@@ -613,6 +613,7 @@ def chooseCap(newcameramtx, roi, mtx, dist, oldCap, x):
 
     elif oldCap == 3:
         
+
         if x <= bordBassin[str(2)][0] :
             cap2 = cv2.VideoCapture()
             cap2.open(adressCam2) 
