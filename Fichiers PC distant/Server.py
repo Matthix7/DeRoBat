@@ -62,8 +62,10 @@ ax = figScat.add_subplot(111)
 
 plt.colorbar(CS3, orientation= "horizontal") # using the colorbar info I got from contourf
 
-plt.xlim(0,3)
-plt.ylim(0,4)
+#plt.xlim(0,3)
+#plt.ylim(0,4)
+plt.axis('off')
+
 
 plt.gca().set_aspect('equal', adjustable = 'box')
 #plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
