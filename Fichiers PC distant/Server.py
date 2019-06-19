@@ -60,7 +60,7 @@ plt.clf()
 
 ax = figScat.add_subplot(111)
 
-plt.colorbar(CS3, orientation= "horizontal") # using the colorbar info I got from contourf
+cb = plt.colorbar(CS3, orientation= "horizontal") # using the colorbar info I got from contourf
 
 #plt.xlim(0,3)
 #plt.ylim(0,4)
@@ -82,23 +82,23 @@ nbPlot = 0 #contient le nombre de plot fait sur le scatter
 #############################################################
 #------------ Init pour l'affichage de le Contourf-----------
 #############################################################
-figCont = plt.figure(1)
-plt.title("Représentation globale du bassin")
-Z = [[0,0],[0,0]]
-levels = np.arange(min,max+step,step)
-Cont = plt.contourf(Z, levels, cmap="viridis")
-plt.clf()
-
-ax = figCont.add_subplot(111)
-
-plt.colorbar(Cont, orientation = "horizontal")
-plt.gca().set_aspect('equal', adjustable = 'box')
-plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
-ax.yaxis.tick_right()
-
-X_Cont = [] #stockage des valeurs de x,y,z
-Y_Cont = []
-Z_Cont = []
+#figCont = plt.figure(1)
+#plt.title("Représentation globale du bassin")
+#Z = [[0,0],[0,0]]
+#levels = np.arange(min,max+step,step)
+#Cont = plt.contourf(Z, levels, cmap="viridis")
+#plt.clf()
+#
+#ax = figCont.add_subplot(111)
+#
+#plt.colorbar(Cont, orientation = "horizontal")
+#plt.gca().set_aspect('equal', adjustable = 'box')
+#plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
+#ax.yaxis.tick_right()
+#
+#X_Cont = [] #stockage des valeurs de x,y,z
+#Y_Cont = []
+#Z_Cont = []
 
 #--------------------------------------------------------
 
@@ -132,31 +132,36 @@ while alive.is_set():
         if nbPlot >= 20:
             print("-----------------Clear Axes----------------")
             plt.figure(0)
+            cb.remove()
+            extent = ax.get_window_extent().transformed(figScat.dpi_scale_trans.inverted())
+            plt.savefig("backgroungPlot.png", bbox_inches=extent)
+
             plt.cla()
             plt.title("Représentation locale du bassin")
             ax = figScat.add_subplot(111)
-            plt.xlim(0,3)
-            plt.ylim(0,4)
+            plt.axis("off")
+            
             plt.gca().set_aspect('equal', adjustable = 'box')
             img=mpimg.imread('backgroungPlot.png')
             imgplot = plt.imshow(img)
+        
 
-            nbPlot = 0
-            print("-------------Update Bathymetrie------------")
-            
-            pas = 1/10
-            ZCont = -3*np.ones((int(4/pas), int(3/pas)))
-            XCont = np.linspace(0,3,np.shape(ZCont)[1])
-            YCont = np.linspace(0,4,np.shape(ZCont)[0])               
-            
-            
-            for ind in range(len(X_Cont)): 
-                ZCont[int(Y_Cont[ind]/pas)][int(X_Cont[ind]/pas)] = np.mean([ZCont[int(Y_Cont[ind]/pas)][int(X_Cont[ind]/pas)], Z_Cont[ind]])
-         
-            plt.figure(1)
-            plt.title("Représentation globale du bassin")
-            Cont = plt.contourf(XCont, YCont, ZCont, levels = levels, cmap="viridis")
-            plt.draw()
+#            nbPlot = 0
+#            print("-------------Update Bathymetrie------------")
+#            
+#            pas = 1/10
+#            ZCont = -3*np.ones((int(4/pas), int(3/pas)))
+#            XCont = np.linspace(0,3,np.shape(ZCont)[1])
+#            YCont = np.linspace(0,4,np.shape(ZCont)[0])               
+#            
+#            
+#            for ind in range(len(X_Cont)): 
+#                ZCont[int(Y_Cont[ind]/pas)][int(X_Cont[ind]/pas)] = np.mean([ZCont[int(Y_Cont[ind]/pas)][int(X_Cont[ind]/pas)], Z_Cont[ind]])
+#         
+#            plt.figure(1)
+#            plt.title("Représentation globale du bassin")
+#            Cont = plt.contourf(XCont, YCont, ZCont, levels = levels, cmap="viridis")
+#            plt.draw()
             
         plt.pause(2)
 
