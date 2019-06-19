@@ -32,14 +32,13 @@ ax = figScat.add_subplot(111)
 cb = plt.colorbar(CS3, orientation= "horizontal") # using the colorbar info I got from contourf
 plt.gca().set_aspect('equal', adjustable = 'box')
 
-plt.axis('off')
+plt.axis('on')
 cb.remove()
 
 img=mpimg.imread('backgroungPlot.png')
 imgplot = plt.imshow(img)
 
 plt.scatter(10, 10, marker = 'o', c = 'red')
-extent = ax.get_window_extent().transformed(figScat.dpi_scale_trans.inverted())
 plt.savefig("foo.png", bbox_inches='tight')
 
 
