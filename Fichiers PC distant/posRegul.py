@@ -47,6 +47,9 @@ class Cam(Thread):
     
     def run(self):
         cv2.namedWindow('Webcam', cv2.WINDOW_NORMAL)
+        
+        saveData = open("saveData.txt","w") 
+
 
         cap1 = cv2.VideoCapture()
         cap1.open(adressCam) 
@@ -55,12 +58,12 @@ class Cam(Thread):
         neutreServo, neutreMoteur = 1090, 1970
         commandes = np.array([[neutreServo], [neutreMoteur]])
         
-        Waypoints = [[0,   1,   1,   0.5],#X
+        Waypoints = [[0,   2,   2,   0.5],#X
                      [2.5, 2.5, 0.5, 0.5]]#Y
     
 
         
-        vTarget = 0.35
+        vTarget = 0.38
 #        xTarget = 3.5
 #        yTarget = 0.5
 #        a = np.array([[4], [0]])    
@@ -96,7 +99,7 @@ class Cam(Thread):
                     if commandes[1,0] < 0:
                         self.commande = (175*commandes[0,0]+neutreServo, (390*abs(commandes[1,0])) + 3000)
                 
-#                    self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
+                    self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
 #                elif xBoat is None:
 #                    self.commande = (neutreServo, neutreMoteur) #on arrete le bateau si on ne le voit pas 
     
@@ -107,11 +110,14 @@ class Cam(Thread):
     
                     print("X = ", xBoat, "\nY = ", yBoat, "\ntheta =", math.degrees(theta))                
                     self.message = str( (xBoat , yBoat, theta) + self.commande)
+                    saveData.write(str(xBoat)+" "+str(yBoat)+" "+str(theta)+" "+str(commandes[0,0])+" "+str(commandes[1,0])+"\n")
+
                 
                 if xBoat == None or yBoat == None:
                     self.message = str( (-1, -1, -1) + self.commande)
                 
                 print("Commande = ", self.commande)
+                
                 
                 
     # =============================================================================
@@ -122,6 +128,7 @@ class Cam(Thread):
             if key == 27: #  echap to quit
                 self.message = str((999,999,999,0,0))
                 self.is_dead = "dead"
+                saveData.close()
                 break
             
         print('Acquisition ended.')
@@ -408,6 +415,7 @@ def run_one_step(cap1,a,b, newcameramtx, roi, mtx, dist):
         else: #le bateau n'est sur aucune camera
             print("ERROR : No boat detected")
             print("bordBasssin = ", bordBassin)
+            print("ids = ", ids1)
             cv2.imshow("Webcam", frame1)
 
             return None, None, None

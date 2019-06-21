@@ -19,7 +19,7 @@ from Thread_Client_Listening import *
 import serial
 import time
 
-arduino = serial.Serial('/dev/ttyACM0', 115200)
+#arduino = serial.Serial('/dev/ttyACM0', 115200)
 
 
 class Listening_Client(Thread):
@@ -82,8 +82,8 @@ class Listening_Client(Thread):
                     msg_recu = msg_recu.split('_')[-2]
                 except:
                     msg_recu = msg_recu.split('_')[0]
-                
-                
+                    
+
                 tuple_recu = eval(msg_recu)
                 print("Reçu Serveur{}".format(tuple_recu))
                 
@@ -97,9 +97,9 @@ class Listening_Client(Thread):
                     message2 = str(2000)
                     message2 = message2.encode()
                     
-                    arduino.write(message2)
+                    #arduino.write(message2)
                     time.sleep(0.5)
-                    arduino.write(message1)
+                    #arduino.write(message1)
                     
                     time.sleep(0.5)
                     print("End Mission")
@@ -125,9 +125,9 @@ class Listening_Client(Thread):
                     msg_arduino1 = str(msg_arduino1).encode()  #Commande servo
                     msg_arduino2 = str(msg_arduino2).encode()  #Commande moteur
                     
-                    arduino.write(msg_arduino1)
+                    #arduino.write(msg_arduino1)
                     time.sleep(0.25)
-                    arduino.write(msg_arduino2)
+                    #arduino.write(msg_arduino2)
                     time.sleep(0.25)    
                 
                 

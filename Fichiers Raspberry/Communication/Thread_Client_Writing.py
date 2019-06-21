@@ -47,7 +47,6 @@ class Writing_Client(Thread):
         sock_sonar.connect(("127.0.0.1", sonar))
         print("Connexion d'écoute établie avec le sonar sur le port {}".format(sonar))
         
-        
         while self.alive.isSet():
             
             pos = self.listening_client.getPos()
@@ -91,6 +90,7 @@ class Writing_Client(Thread):
             # On envoie le message
             sock_server.send(msg_a_envoyer)
             msg_recu = sock_server.recv(1024)
+
             print("Envoi Serveur{}".format(msg_a_envoyer.decode()))# Là encore, peut planter s'il y a des accents
             time.sleep(0.0075) # Ajusté pour essayer d'exploiter toutes les acquisitions
         
