@@ -72,7 +72,7 @@ def dCommande(X, w):
     
     rudderCommand = erreurCap + 2*derreur
     
-    motorCommand = 0.1*tanh(vTarget - v) #rajouter constante ???
+    motorCommand = 2*tanh(vTarget - v) #rajouter constante ???
     
     return array([[rudderCommand], [motorCommand]])
     
@@ -154,18 +154,20 @@ def draw_boat(x, size = 0.1):
 if __name__ == '__main__':
 
     plt.figure()
-    vTarget = 0.5
+    vTarget = 0.3
+    dt = 0.1
 
     
     # =============================================================================
     # Configuration initiale
     # =============================================================================
-    X = array([[0], [2.5], [1], [0.5], [0]])
+    X = array([[0], [3], [0], [0], [0]])
     commandes = array([[0.], [0.]])
     
     
-    Waypoints = [[4,0.5],# ,3   ,0.5 ,0.5],
-                 [0,2.5]]# ,2.5 ,0.5 ,2.5]]
+    Waypoints = [[0,   2,   2,   0.5],#   2,   0.5],#X
+                 [2.5, 2.5, 0.5, 0.5]]#, 0.5, 0.5]]#Y
+    
     
     for k in range(len(Waypoints[0])-1):
         a = array([[Waypoints[0][k]], [Waypoints[1][k]]])
@@ -175,8 +177,8 @@ if __name__ == '__main__':
                 
                
             plt.cla()
-            plt.xlim((0, 4))
-            plt.ylim((0, 3))
+            plt.xlim((-1, 5))
+            plt.ylim((-1, 4))
             plt.gca().set_aspect('equal', adjustable='box')
             
             commandes = getCommande(X, a, b, vTarget, commandes)

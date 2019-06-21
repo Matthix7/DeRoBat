@@ -111,18 +111,20 @@ def vconcat_resize_min(im_list, interpolation=cv2.INTER_CUBIC):
 
 def cutImage(frame, corners, ids, number):
     
-    if number == 1:
-        getBordBassin(corners, ids)
+    if number == 1 :
+        while not(10 in bordBassin and 0 in bordBassin and str(1) in bordBassin):
+            getBordBassin(corners, ids)
+            print(bordBassin)
         x = bordBassin[0][0] -10
         y = bordBassin[0][1] -10
         h = abs(bordBassin[10][1] - bordBassin[0][1]) +10
         w = abs(bordBassin[0][0] - bordBassin[str(1)][0]) +10
         crop_img = frame[x:x+w,y:y+h]
         return crop_img
-
-        
-    elif number == 2:
-        getBordBassin(corners, ids, cam2 = True)
+    
+    if number == 2:
+        while(11 in bordBassin and str(2) in bordBassin and 1 in bordBassin):
+            getBordBassin(corners, ids, cam2 = True)
         x = bordBassin[1][0] -10
         y = bordBassin[1][1] -10
         h = abs(bordBassin[11][1] - bordBassin[1][1]) +10
@@ -130,9 +132,9 @@ def cutImage(frame, corners, ids, number):
         crop_img = frame[x:x+w,y:y+h]
         return crop_img
 
-        
-    elif number == 3:
-        getBordBassin(corners, ids , cam3 = True)
+    if number == 3:
+        while(2 in bordBassin and 12 in bordBassin and 3 in bordBassin):
+            getBordBassin(corners, ids , cam3 = True)
         x = bordBassin[2][0] -10
         y = bordBassin[2][1] -10
         h = abs(bordBassin[12][1] - bordBassin[2][1]) +10
@@ -140,45 +142,49 @@ def cutImage(frame, corners, ids, number):
         crop_img = frame[x:x+w,y:y+h]
         return crop_img
 
+
+if __name__ == "__main__":
+
+    newcameramtx, roi, mtx, dist =  calibration()
+    
+    cap1 = cv2.VideoCapture()
+    cap1.open(adressCam1)
+    ret, frame1 = cap1.read()
+    if ret:
+        frame1 = undistort(frame1, newcameramtx, roi, mtx, dist)
+        corner, ids = detectAruco(frame1)
+        cap1.release()
+        crop1 = cutImage(frame1, corner, ids, 1)
+    #    cv2.imshow("Frame 1", resizeFrame(crop1))
+    else:
+        crop1 = np.ones((2000,2000))
         
-
-newcameramtx, roi, mtx, dist =  calibration()
-
-cap1 = cv2.VideoCapture()
-cap1.open(adressCam1)
-ret, frame1 = cap1.read()
-if ret:
-    frame1 = undistort(frame1, newcameramtx, roi, mtx, dist)
-    corner, ids = detectAruco(frame1)
-    cap1.release()
-    crop1 = cutImage(frame1, corner, ids, 1)
-#    cv2.imshow("Frame 1", resizeFrame(crop1))
-
-cap2 = cv2.VideoCapture()
-cap2.open(adressCam2)
-ret, frame2 = cap2.read()
-if ret:
-    frame2 = undistort(frame2, newcameramtx, roi, mtx, dist)
-    corner, ids = detectAruco(frame2)
-    cap2.release()
-    crop2 = cutImage(frame2, corner, ids, 2)
-#    cv2.imshow("Frame 2", resizeFrame(crop2))
-
-cap3 = cv2.VideoCapture()
-cap3.open(adressCam3) 
-ret, frame3 = cap3.read()
-if ret:
-    frame3 = undistort(frame3, newcameramtx, roi, mtx, dist)
-    corner, ids = detectAruco(frame3)
-    cap3.release()
-    crop3 = cutImage(frame3, corner, ids, 3)
-#    cv2.imshow("Frame 3", resizeFrame(crop3))
-
-
-
-im_v_resize = vconcat_resize_min([crop1, crop2,crop3])
-cv2.imwrite('backgroundPlot.png', im_v_resize)
-
-
-
-
+    cap2 = cv2.VideoCapture()
+    cap2.open(adressCam2)
+    ret, frame2 = cap2.read()
+    if ret:
+        frame2 = undistort(frame2, newcameramtx, roi, mtx, dist)
+        corner, ids = detectAruco(frame2)
+        cap2.release()
+        crop2 = cutImage(frame2, corner, ids, 2)
+    #    cv2.imshow("Frame 2", resizeFrame(crop2))
+        
+    else:
+        crop2 = crop1 * 0
+    
+    cap3 = cv2.VideoCapture()
+    cap3.open(adressCam3) 
+    ret, frame3 = cap3.read()
+    if ret:
+        frame3 = undistort(frame3, newcameramtx, roi, mtx, dist)
+        corner, ids = detectAruco(frame3)
+        cap3.release()
+        crop3 = cutImage(frame3, corner, ids, 3)
+    #    cv2.imshow("Frame 3", resizeFrame(crop3))
+    else:
+        crop2 = crop1 * 0
+    
+    
+    
+    im_v_resize = vconcat_resize_min([crop1, crop2,crop3])
+    cv2.imwrite('backgroundPlot.png', im_v_resize)

@@ -65,27 +65,37 @@ while(True):
     key = cv2.waitKey(1) & 0xFF
     
     ret, frame1 = cap1.read()
+    if ret:
+        corner, ids = detectAruco(frame1)
+        aruco.drawDetectedMarkers(frame1, corner, ids)
+        cv2.imshow("Webcam 1", resizeFrame(frame1))
+    else:
+        print("No Cam 1")
+
+
     ret, frame2 = cap2.read()
-    
-#    frame1 = undistort(frame1, newcameramtx, roi, mtx, dist)
-#    frame2 = undistort(frame2, newcameramtx, roi, mtx, dist)
+    if ret:
+        corner, ids = detectAruco(frame2)
+        aruco.drawDetectedMarkers(frame2, corner, ids)
+        cv2.imshow("Webcam 2", resizeFrame(frame2))
+    else:
+        print("No Cam 2")
 
+        
+    ret, frame3 = cap3.read()
+    if ret:
+        corner, ids = detectAruco(frame3)
+        aruco.drawDetectedMarkers(frame3, corner, ids)
+        cv2.imshow("Webcam 3", resizeFrame(frame3))
+    else:
+        print("No Cam 3")
 
-    corner, ids = detectAruco(frame1)
-    aruco.drawDetectedMarkers(frame1, corner, ids)
-    corner, ids = detectAruco(frame2)
-    aruco.drawDetectedMarkers(frame2, corner, ids)
-
-
-    
-    cv2.imshow("Webcam 1", resizeFrame(frame1))
-    
-    cv2.imshow("Webcam 2", resizeFrame(frame2))
+#    frame1 = undistort(frame1, newcameramtx, roi, mtx, dist)    
 
     if key == 27:
         break
 
 cap1.release()
 cap2.release()
-
+cap3.release()
 cv2.destroyAllWindows()

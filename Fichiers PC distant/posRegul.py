@@ -27,9 +27,8 @@ class Cam(Thread):
         Thread.__init__(self)
         self.is_dead = "alive"
                         
-        self.message = str((-1,-1,-1,0,0)) 
         self.commande = (1090,2000)
-        
+        self.message = str( (-1 ,-1, -1) + self.commande)
         print('Calibration running...')
         self.newcameramtx, self.roi, self.mtx, self.dist =  calibration()
         
@@ -53,71 +52,71 @@ class Cam(Thread):
         cap1.open(adressCam) 
         
         
-        neutreServo, neutreMoteur = 1090, 2000
+        neutreServo, neutreMoteur = 1090, 1970
         commandes = np.array([[neutreServo], [neutreMoteur]])
         
-        Waypoints = [[0,3],# ,3   ,0.5 ,0.5], #X
-                     [3,1]]# ,2.5 ,0.5 ,2.5]] #Y
+        Waypoints = [[0,   1,   1,   0.5],#X
+                     [2.5, 2.5, 0.5, 0.5]]#Y
     
+
+        
+        vTarget = 0.35
+#        xTarget = 3.5
+#        yTarget = 0.5
+#        a = np.array([[4], [0]])    
+#        b = np.array([[xTarget], [yTarget]])
+        X = np.array([[0], [0], [0], [0], [0]])
         for k in range(len(Waypoints[0])-1):
             a = np.array([[Waypoints[0][k]], [Waypoints[1][k]]])
             b = np.array([[Waypoints[0][k+1]], [Waypoints[1][k+1]]])
 
-        
-#        xTarget = 3.5
-#        yTarget = 0.5
-        vTarget = 0.15
-#        
-#        a = np.array([[4], [0]])    
-#        b = np.array([[xTarget], [yTarget]])
-        X = np.array([[0], [0], [0], [0], [0]])
-        
-        print('Acquisition running...')
-        while(cap1.isOpened()) and ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
-            
-            xBoat, yBoat,theta = run_one_step(cap1,a,b,self.newcameramtx, self.roi, self.mtx, self.dist)
-
-            
-# =============================================================================
-#             Bloc régulation
-#            array commandes = ([[radians], [m/s]])
-#            array self.commande = ([[pwm], [pwm]])
-# =============================================================================
-            
-            posServo = commandes[0,0]
-            posMoteur = commandes[1,0]
-            
-            if not xBoat is None: #si le bateau n'est pas vu sur la camera -> soustraction sur un None = Bug
-            
-                X = np.array([[xBoat], [yBoat], [theta], [posServo], [posMoteur]])
-                commandes = getCommande(X, a, b, vTarget, commandes)  #Appel module regulation
+            print('Acquisition running...')
+            while(cap1.isOpened()) and ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
                 
-                if commandes[1,0] >= 0:
-                    self.commande = (175*commandes[0,0]+neutreServo, (238*commandes[1,0]+27) + 2000)
-                if commandes[1,0] < 0:
-                    self.commande = (175*commandes[0,0]+neutreServo, (390*abs(commandes[1,0])+31) + 3000)
-            
-                self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
-            elif xBoat is None:
-                self.commande = (neutreServo, neutreMoteur) #on arrete le bateau si on ne le voit pas 
-
-# =============================================================================
-#             Expédition des données utiles en aval
-# =============================================================================
-            if xBoat != None and yBoat != None:
-
-                print("X = ", xBoat, "\nY = ", yBoat, "\ntheta =", math.degrees(theta))                
-                self.message = str( (xBoat , yBoat, theta) + self.commande)
-            
-            if xBoat == None or yBoat == None:
-                self.message = str( (-1, -1, -1) + self.commande)
-            
-            print("Commande = ", self.commande)
-            
-            
-# =============================================================================
-#             Fin du programme
-# =============================================================================
+                xBoat, yBoat,theta = run_one_step(cap1,a,b,self.newcameramtx, self.roi, self.mtx, self.dist)
+    
+                
+    # =============================================================================
+    #             Bloc régulation
+    #            array commandes = ([[radians], [m/s]]) #FAUX ?
+    #            array self.commande = ([[pwm], [pwm]])
+    # =============================================================================
+                
+                posServo = commandes[0,0]
+                posMoteur = commandes[1,0]
+                
+                if not xBoat is None: #si le bateau n'est pas vu sur la camera -> soustraction sur un None = Bug
+                
+                    X = np.array([[xBoat], [yBoat], [theta], [posServo], [posMoteur]])
+#                    print("----VTarget :",vTarget)
+                    commandes = getCommande(X, a, b, vTarget, commandes)  #Appel module regulation
+#                    print("---- Commandes: ", commandes)
+                    if commandes[1,0] >= 0:
+                        self.commande = (175*commandes[0,0]+neutreServo, (238*commandes[1,0]) + 2000)
+                    if commandes[1,0] < 0:
+                        self.commande = (175*commandes[0,0]+neutreServo, (390*abs(commandes[1,0])) + 3000)
+                
+#                    self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
+#                elif xBoat is None:
+#                    self.commande = (neutreServo, neutreMoteur) #on arrete le bateau si on ne le voit pas 
+    
+    # =============================================================================
+    #             Expédition des données utiles en aval
+    # =============================================================================
+                if xBoat != None and yBoat != None:
+    
+                    print("X = ", xBoat, "\nY = ", yBoat, "\ntheta =", math.degrees(theta))                
+                    self.message = str( (xBoat , yBoat, theta) + self.commande)
+                
+                if xBoat == None or yBoat == None:
+                    self.message = str( (-1, -1, -1) + self.commande)
+                
+                print("Commande = ", self.commande)
+                
+                
+    # =============================================================================
+    #             Fin du programme
+    # =============================================================================
             
             key = cv2.waitKey(1) & 0xFF
             if key == 27: #  echap to quit
@@ -391,8 +390,8 @@ def run_one_step(cap1,a,b, newcameramtx, roi, mtx, dist):
     if ret1:
         corners1, ids1 = detectAruco(frame1)
         aruco.drawDetectedMarkers(frame1, corners1, ids1)
-        drawPoint(frame1,a)
-        drawPoint(frame1,b)
+#        drawPoint(frame1,a)
+#        drawPoint(frame1,b)
 
 
         

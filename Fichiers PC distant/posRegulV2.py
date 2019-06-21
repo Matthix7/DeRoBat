@@ -70,7 +70,7 @@ class Cam(Thread):
         
 #        xTarget = 3.5
 #        yTarget = 0.5
-        vTarget = 0.15
+        vTarget = 0.4
 #        
 #        a = np.array([[4], [0]])    
 #        b = np.array([[xTarget], [yTarget]])
@@ -97,9 +97,9 @@ class Cam(Thread):
                 commandes = getCommande(X, a, b, vTarget, commandes)  #Appel module regulation
                 
                 if commandes[1,0] >= 0:
-                    self.commande = (175*commandes[0,0]+neutreServo, (238*commandes[1,0]+27) + 2000)
+                    self.commande = (175*commandes[0,0]+neutreServo, (238*commandes[1,0]) + 2000)
                 if commandes[1,0] < 0:
-                    self.commande = (175*commandes[0,0]+neutreServo, (390*abs(commandes[1,0])+31) + 3000)
+                    self.commande = (175*commandes[0,0]+neutreServo, (390*abs(commandes[1,0])) + 3000)
             
                 self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
             elif xBoat is None:

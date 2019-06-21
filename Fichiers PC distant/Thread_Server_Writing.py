@@ -12,7 +12,7 @@ https://openclassrooms.com/fr/courses/235344-apprenez-a-programmer-en-python/223
 import socket
 from threading import Thread
 import time
-from posRegulV2 import Cam
+from posRegul import Cam
 
 class Writing_Server(Thread):
     """Prise en charge des fonctionnalités d'écriture du serveur"""
