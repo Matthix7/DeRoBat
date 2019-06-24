@@ -143,6 +143,9 @@ while alive.is_set():
             ax = figScat.add_subplot(111)
             plt.xlim(0,3)
             plt.ylim(0,4)
+            plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
+            ax.yaxis.tick_right()
+
 
 #            plt.axis("off")
             
