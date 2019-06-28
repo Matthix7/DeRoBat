@@ -46,11 +46,11 @@ thread_listening.start()
 figScat = plt.figure(0)
 plt.title("Représentation locale du bassin")
 
-min, max = (-3, 0) #max and min for the colorbar (in meters)
+min, max = (-1, 0) #max and min for the colorbar (in meters)
 step = 0.01
 
 # Setting up a colormap that's a simple transtion
-mymap = mpl.colors.LinearSegmentedColormap.from_list('mycolors',['blue','green','red'])
+mymap = mpl.colors.LinearSegmentedColormap.from_list('mycolors',['blue','red','green'])
 
 # Using contourf to provide my colorbar info, then clearing the figure
 Z = [[0,0],[0,0]]
@@ -62,8 +62,8 @@ ax = figScat.add_subplot(111)
 
 cb = plt.colorbar(CS3, orientation= "horizontal") # using the colorbar info I got from contourf
 
-plt.xlim(0,3)
-plt.ylim(0,4)
+plt.xlim(0,5.2)
+plt.ylim(0,10.2)
 #plt.axis('off')
 
 
@@ -86,7 +86,7 @@ figCont = plt.figure(1)
 plt.title("Représentation globale du bassin")
 Z = [[0,0],[0,0]]
 levels = np.arange(min,max+step,step)
-Cont = plt.contourf(Z, levels, cmap="viridis")
+Cont = plt.contourf(Z, levels, cmap="brg")
 plt.clf()
 
 ax = figCont.add_subplot(111)
@@ -101,34 +101,35 @@ Y_Cont = []
 Z_Cont = []
 
 #--------------------------------------------------------
-
 while alive.is_set():
     X, Y, Z, xBoat, yBoat = thread_listening.toMap()
-    
-        
+#    print(X)
     if X != []:
+#        print("BATH")
         #Représentation 3D en 2D
         #bathy 3d avec scatter couleur entre -3 et 0 m
         for x,y,z in zip(X,Y,Z):
-            std = 0.4
-            r = 2.5*std*scipy.stats.norm.pdf(z,0,std)
-            g = 2.5*std*scipy.stats.norm.pdf(z,-1.5,std)
-            b = 2.5*std*scipy.stats.norm.pdf(z,-3,std)
-        
-            col = np.array([[r,g,b]]) #blue if z = -3, green if z = -1.5, red if z = -0
+            if xBoat > 0 and yBoat > 0 and xBoat < 10.2 and yBoat < 5.2:
+                std = 0.2
+                r = 2.5*std*scipy.stats.norm.pdf(z,-0.5,std)
+                g = 2.5*std*scipy.stats.norm.pdf(z,0,std)
+                b = 2.5*std*scipy.stats.norm.pdf(z,-1,std)
+            
+                col = np.array([[r,g,b]]) #blue if z = -3, green if z = -1.5, red if z = -0
+                plt.figure(0)
+                plt.scatter(y, x, marker = 'o', c = col)
+                
+                X_Cont.append(y)
+                Y_Cont.append(x)
+                Z_Cont.append(z)
+            
+        if xBoat > 0 and yBoat > 0 and xBoat < 10.2 and yBoat < 5.2:
             plt.figure(0)
-            plt.scatter(y, x, marker = 'o', c = col)
-            
-            X_Cont.append(y)
-            Y_Cont.append(x)
-            Z_Cont.append(z)
-            
-        
-        plt.figure(0)
-        plt.plot(yBoat, xBoat, marker = 'x', color = 'red')
+            plt.plot(yBoat, xBoat, marker = 'x', color = 'yellow')
         
             
         nbPlot += 1
+        print("---- NB PLot : ", nbPlot)
         if nbPlot >= 20:
             print("-----------------Clear Axes----------------")
             plt.figure(0)
@@ -141,8 +142,8 @@ while alive.is_set():
 
             plt.title("Représentation locale du bassin")
             ax = figScat.add_subplot(111)
-            plt.xlim(0,3)
-            plt.ylim(0,4)
+            plt.xlim(0,5.2)
+            plt.ylim(0,10.2)
             plt.gca().invert_xaxis() #on inverse l'axe x (correspond au y de l'image)
             ax.yaxis.tick_right()
 
@@ -158,9 +159,9 @@ while alive.is_set():
             print("-------------Update Bathymetrie------------")
             
             pas = 1/10
-            ZCont = -3*np.ones((int(4/pas), int(3/pas)))
-            XCont = np.linspace(0,3,np.shape(ZCont)[1])
-            YCont = np.linspace(0,4,np.shape(ZCont)[0])               
+            ZCont = -1*np.ones((int(10.2/pas), int(5.2/pas)))
+            XCont = np.linspace(0,5.2,np.shape(ZCont)[1])
+            YCont = np.linspace(0,10.2,np.shape(ZCont)[0])               
             
             
             for ind in range(len(X_Cont)): 
@@ -168,13 +169,14 @@ while alive.is_set():
          
             plt.figure(1)
             plt.title("Représentation globale du bassin")
-            Cont = plt.contourf(XCont, YCont, ZCont, levels = levels, cmap="viridis")
+            Cont = plt.contourf(XCont, YCont, ZCont, levels = levels, cmap="brg")
             plt.draw()
             
         plt.pause(2)
 
             
-    
+print("------ IS_DEAD -------")
+  
 # Attend que les threads se terminent
 thread_listening.join()
 

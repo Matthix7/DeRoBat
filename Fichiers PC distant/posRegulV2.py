@@ -12,15 +12,15 @@ from calibrate_camera import calibration, undistort
 
 bordBassin = dict() #pour la position des aruco sur le bord
 
-distAr0Ar1 = 3.5 #distance entre l'aruco 0 et 1 (axe des X)
-distAr0Ar10 = 3 #distance entre l'aruco 0 et 10 (axe des Y)
+distAr0Ar1 = 3.4 #distance entre l'aruco 0 et 1 (axe des X)
+distAr0Ar10 = 5.2 #distance entre l'aruco 0 et 10 (axe des Y)
 
 
 ############# #Check adresse avec IPUtility #################################
 #############################################################################
-adressCam1 = 'http://root:1234@169.254.236.203/mjpg/video.mjpg'   
-adressCam2 = 'http://root:1234@169.254.206.22/mjpg/video.mjpg'   
-adressCam3 = 'http://root:1234@169.254.234.41/mjpg/video.mjpg'    
+adressCam2 = 'http://root:1234@169.254.236.203/mjpg/video.mjpg'   
+adressCam3 = 'http://root:1234@169.254.206.22/mjpg/video.mjpg'   
+adressCam1 = 'http://root:1234@169.254.15.151/mjpg/video.mjpg'    
 
 #############################################################################
 #############################################################################
@@ -55,83 +55,90 @@ class Cam(Thread):
     
     def run(self):
         cv2.namedWindow('Webcam', cv2.WINDOW_NORMAL)
-        
+        cpt = 0
         
         neutreServo, neutreMoteur = 1090, 2000
         commandes = np.array([[neutreServo], [neutreMoteur]])
         
-        Waypoints = [[0,3],# ,3   ,0.5 ,0.5], #X
-                     [3,1]]# ,2.5 ,0.5 ,2.5]] #Y
-    
-        for k in range(len(Waypoints[0])-1):
-            a = np.array([[Waypoints[0][k]], [Waypoints[1][k]]])
-            b = np.array([[Waypoints[0][k+1]], [Waypoints[1][k+1]]])
-
-        
+        Waypoints = [[4 ,6.2],# ,3   ,0.5 ,0.5], #X
+                     [2.6,2.6]]# ,2.5 ,0.5 ,2.5]] #Y
 #        xTarget = 3.5
 #        yTarget = 0.5
-        vTarget = 0.4
+        vTarget = 0.38
 #        
 #        a = np.array([[4], [0]])    
 #        b = np.array([[xTarget], [yTarget]])
         X = np.array([[0], [0], [0], [0], [0]])
+
+        for k in range(len(Waypoints[0])-1):
+            a = np.array([[Waypoints[0][k]], [Waypoints[1][k]]])
+            b = np.array([[Waypoints[0][k+1]], [Waypoints[1][k+1]]])        
         
-        print('Acquisition running...')
-        while True or ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
-            
-            xBoat, yBoat,theta = run_one_step(a,b,self.newcameramtx, self.roi, self.mtx, self.dist)
+            print('Acquisition running...')
+            while True:
+                print("---- Ligne :\n", a ,b)
+                if ((b-a).T @ (b-X[:2])) < 0:
+                    bOld = b
+                    b = a
+                    a = bOld
 
-            
-# =============================================================================
-#             Bloc régulation
-#            array commandes = ([[radians], [m/s]])
-#            array self.commande = ([[pwm], [pwm]])
-# =============================================================================
-            
-            posServo = commandes[0,0]
-            posMoteur = commandes[1,0]
-            
-            if not xBoat is None: #si le bateau n'est pas vu sur la camera -> soustraction sur un None = Bug
-            
-                X = np.array([[xBoat], [yBoat], [theta], [posServo], [posMoteur]])
-                commandes = getCommande(X, a, b, vTarget, commandes)  #Appel module regulation
                 
-                if commandes[1,0] >= 0:
-                    self.commande = (175*commandes[0,0]+neutreServo, (238*commandes[1,0]) + 2000)
-                if commandes[1,0] < 0:
-                    self.commande = (175*commandes[0,0]+neutreServo, (390*abs(commandes[1,0])) + 3000)
-            
-                self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
-            elif xBoat is None:
-                self.commande = (neutreServo, neutreMoteur) #on arrete le bateau si on ne le voit pas 
-
-# =============================================================================
-#             Expédition des données utiles en aval
-# =============================================================================
-            if xBoat != None and yBoat != None:
-                print("X = ", xBoat, "\nY = ", yBoat, "\ntheta =", math.degrees(theta))       
-                self.message = str( (xBoat , yBoat, theta) + self.commande)
-            
-            if xBoat == None or yBoat == None:
-                self.message = str( (-1, -1, -1) + self.commande)
+                xBoat, yBoat,theta = run_one_step(a,b,self.newcameramtx, self.roi, self.mtx, self.dist)
+    
                 
-            print("Commande = ", self.commande)
-            
-            
+    # =============================================================================
+    #             Bloc régulation
+    #            array commandes = ([[radians], [m/s]])
+    #            array self.commande = ([[pwm], [pwm]])
+    # =============================================================================
+                
+                posServo = commandes[0,0]
+                posMoteur = commandes[1,0]
+                
+                if not xBoat is None: #si le bateau n'est pas vu sur la camera -> soustraction sur un None = Bug
+                
+                    X = np.array([[xBoat], [yBoat], [theta], [posServo], [posMoteur]])
+                    commandes = getCommande(X, a, b, vTarget, commandes)  #Appel module regulation                    
+                    
+                    if commandes[1,0] >= 0:
+                        self.commande = (175*commandes[0,0]+neutreServo, (238*commandes[1,0]) + 2000)
+                    if commandes[1,0] < 0:
+                        self.commande = (175*commandes[0,0]+neutreServo, (390*abs(commandes[1,0])) + 3000)
+#                    print("REgulation : ",commandes, self.commande)
+#                    self.commande = (neutreServo, neutreMoteur) #on retire la regualtion
+                elif xBoat is None:
+                    self.commande = (175*commandes[0,0]+neutreServo, neutreMoteur) #on arrete le bateau si on ne le voit pas 
+    
+    # =============================================================================
+    #             Expédition des données utiles en aval
+    # =============================================================================
+                if xBoat != None and yBoat != None:
+                    print("X = ", xBoat, "\nY = ", yBoat, "\ntheta =", math.degrees(theta))       
+                    self.message = str( (xBoat , yBoat, theta) + self.commande)
+                
+                if xBoat == None or yBoat == None:
+                    self.message = str( (-1, -1, -1) + self.commande)
+                    
+                print("Commande = ", self.commande)
+                print(cpt)
+                cpt +=1
 # =============================================================================
 #             Fin du programme
 # =============================================================================
             
-            key = cv2.waitKey(1) & 0xFF
-            if key == 27: #  echap to quit
-                self.message = str((999,999,999,0,0))
-                self.is_dead = "dead"
-                break
-            
+                key = cv2.waitKey(1) & 0xFF
+                if key == 27: #  echap to quit
+                    print('Acquisition ended.')
+                    cv2.destroyAllWindows()
+                    self.message = str((999,999,999,0,0))
+                    self.is_dead = "dead"
+                    return
+                
         print('Acquisition ended.')
         cv2.destroyAllWindows()
         self.message = str((999,999,999,0,0))
         self.is_dead = "dead"
+
 
 
 
@@ -445,7 +452,7 @@ def getPositionCam3(corners3, ids3, frame3):
     #--- On ajuste la position du bateau dans le bassin de la camera au bassin en général ---
 
         pos[0][0] = pos[0][0] + getDistCam3()
-        print("-----DIST-----",getDistCam2(), getDistCam3())
+#        print("-----DIST-----",getDistCam2(), getDistCam3())
         
         xBoat = pos[0][0] * distAr0Ar1/(bordBassin[str(1)][0] - bordBassin[0][0])
         yBoat = pos[1][0] * distAr0Ar10/(bordBassin[10][1] - bordBassin[0][1])
@@ -672,6 +679,8 @@ def run_one_step(a, b, newcameramtx, roi, mtx, dist):
         xBoat = 0
     frame, corners, ids, number = chooseCap(newcameramtx, roi, mtx, dist, oldCap,xBoat)
     
+    
+    
     if frame is None:
         print("ERROR : No Boat detected")
         print("bordBassin = ", bordBassin)
@@ -706,12 +715,16 @@ def run_one_step(a, b, newcameramtx, roi, mtx, dist):
                     
         xBoat, yBoat = getPositionCam3(corners, ids, frame)
         print("-----Webcam 3-----")
+        
+    cv2.imshow("Webcam", frame)
+
             
     if math.isnan(theta):
         print("ERROR: theta is nan")
+        print("bordBassin = ", bordBassin)
+
         return -1,-1,-1
     
-    cv2.imshow("Webcam", frame)
 
     
     return xBoat, yBoat,theta

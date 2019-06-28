@@ -74,7 +74,7 @@ class Cam(Thread):
             b = np.array([[Waypoints[0][k+1]], [Waypoints[1][k+1]]])
 
             print('Acquisition running...')
-            while(cap1.isOpened()) :#and ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
+            while(cap1.isOpened()) and ((b-a).T @ (b-X[:2])) / (norm(b-a)*norm(b-X[:2])) >= 0:
                 
                 xBoat, yBoat,theta = run_one_step(cap1,a,b,self.newcameramtx, self.roi, self.mtx, self.dist)
     
@@ -393,7 +393,6 @@ def run_one_step(cap1,a,b, newcameramtx, roi, mtx, dist):
     
     ret1, frame1 = cap1.read()
     frame1 = undistort(frame1, newcameramtx, roi, mtx, dist)
-    cv2.imshow("Webcam", frame1)
 
     if ret1:
         corners1, ids1 = detectAruco(frame1)
@@ -411,7 +410,8 @@ def run_one_step(cap1,a,b, newcameramtx, roi, mtx, dist):
             xBoat, yBoat = getPosition(corners1, ids1, frame1)
             
             drawBoat(frame1, xBoat, yBoat)
-            
+            cv2.imshow("Webcam", frame1)
+
             
         else: #le bateau n'est sur aucune camera
             print("ERROR : No boat detected")
@@ -419,10 +419,9 @@ def run_one_step(cap1,a,b, newcameramtx, roi, mtx, dist):
             print("ids = ", ids1)
             cv2.imshow("Webcam", frame1)
 
+
             return None, None, None
         
-        cv2.imshow("Webcam", frame1)
-
         
 
         

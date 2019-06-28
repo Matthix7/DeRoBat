@@ -14,7 +14,7 @@ from numpy import array, cos, sin, pi, ones, hstack, vstack, arctan,tanh
 from math import atan2
 import matplotlib.pyplot as plt
 from numpy.linalg import norm, det
-
+import math
 # =============================================================================
 #              Vecteur d'état                    
 #  X = (x, y, cap, angle_safran, vitesse) 
@@ -33,7 +33,7 @@ dt = 0.5
 
 # =============================================================================
 # Contraintes
-angle_max = pi/12
+angle_max = pi/8
 vmax = 1
 # =============================================================================
 
@@ -70,7 +70,7 @@ def dCommande(X, w):
     erreurCap = -sawtooth(capTarget - cap)
     derreur = -v*sin(servo) 
     
-    rudderCommand = erreurCap + 2*derreur
+    rudderCommand = angle_max*erreurCap + 0*derreur
     
     motorCommand = 2*tanh(vTarget - v) #rajouter constante ???
     
@@ -86,7 +86,7 @@ def getConsignes(X, a, b, vTarget):
     
     d = b-a
     e = det( hstack(( X[:2]-a, d/norm(d) )) )
-    capTarget = atan2(d[1], d[0]) + 0.5*arctan(e)
+    capTarget = atan2(d[1], d[0]) + 0.0*arctan(e)
     
     
     return array([[capTarget], [vTarget]])
@@ -109,8 +109,23 @@ def maxFloat(x,y):
 def getCommande(X, a, b, vTarget, commande_precedente):
     
     consigne = getConsignes(X, a, b, vTarget)
-    dU = dCommande(X, consigne)
-    commande = commande_precedente + dt*dU
+    commande = dCommande(X, consigne)
+    
+    d = b-a
+    e = det( hstack(( X[:2]-a, d/norm(d) )) )
+    capTarget = atan2(d[1], d[0]) + 0.5*arctan(e)
+    deltaTarget = capTarget - X[2]
+#    print("---- deltaTarget : ", deltaTarget)
+    if math.cos(deltaTarget) >= 0:
+        commande[0,0] = -angle_max*math.sin(deltaTarget)
+    else:
+        if math.sin(deltaTarget) >= 0:
+            commande[0,0] = -angle_max
+        else: 
+            commande[0,0] = angle_max
+   
+    commande[1,0] = 0.38
+    #commande = commande_precedente + dt*dU
     commande[0, 0] = maxFloat(-angle_max, minFloat(commande[0,0] , angle_max))
     commande[1, 0] = maxFloat(-vmax, minFloat(commande[1,0] , vmax))
     

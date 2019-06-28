@@ -9,9 +9,9 @@ import cv2.aruco as aruco
 
 from calibrate_camera import calibration, undistort
 
-adressCam1 = 'http://root:1234@169.254.236.203/mjpg/video.mjpg'   
-adressCam2 = 'http://root:1234@169.254.206.22/mjpg/video.mjpg'   
-adressCam3 = 'http://root:1234@169.254.234.41/mjpg/video.mjpg'   
+adressCam2 = 'http://root:1234@169.254.236.203/mjpg/video.mjpg'   
+adressCam3 = 'http://root:1234@169.254.206.22/mjpg/video.mjpg'   
+adressCam1 = 'http://root:1234@169.254.15.151/mjpg/video.mjpg'    
 
 def resizeFrame(frame):
     """
@@ -47,7 +47,7 @@ def detectAruco(image):#return aruco's position and id
 
     return corners, ids
 
-#newcameramtx, roi, mtx, dist =  calibration()
+newcameramtx, roi, mtx, dist =  calibration()
 
 cap1 = cv2.VideoCapture()
 cap1.open(adressCam1)
@@ -66,6 +66,7 @@ while(True):
     
     ret, frame1 = cap1.read()
     if ret:
+        frame1 = undistort(frame1, newcameramtx, roi, mtx, dist)
         corner, ids = detectAruco(frame1)
         aruco.drawDetectedMarkers(frame1, corner, ids)
         cv2.imshow("Webcam 1", resizeFrame(frame1))
@@ -75,6 +76,7 @@ while(True):
 
     ret, frame2 = cap2.read()
     if ret:
+        frame2 = undistort(frame2, newcameramtx, roi, mtx, dist)
         corner, ids = detectAruco(frame2)
         aruco.drawDetectedMarkers(frame2, corner, ids)
         cv2.imshow("Webcam 2", resizeFrame(frame2))
@@ -84,6 +86,7 @@ while(True):
         
     ret, frame3 = cap3.read()
     if ret:
+        frame3 = undistort(frame3, newcameramtx, roi, mtx, dist)
         corner, ids = detectAruco(frame3)
         aruco.drawDetectedMarkers(frame3, corner, ids)
         cv2.imshow("Webcam 3", resizeFrame(frame3))
