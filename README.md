@@ -21,3 +21,7 @@ Mot de Passe: derobat
 1) Se placer dans la fenêtre "Webcam" d'acquisition vidéo.
 2) Appuyer sur `echap`.
 3) Tous les programmes devraient s'éteindre automatiquement. Si ce n'est pas le cas, `CTRL+C`...
+
+
+## En fonctionnement
+![alt text](https://github.com/Matthix7/DeRoBat/blob/master/Visuels/Bateau/Fischkutter/Screenshot_20190703-202959.png "En fonctionnement")
