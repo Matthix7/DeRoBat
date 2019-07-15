@@ -107,7 +107,8 @@ while alive.is_set():
     if X != []:
 #        print("BATH")
         #Représentation 3D en 2D
-        #bathy 3d avec scatter couleur entre -3 et 0 m
+        #bathy 3d avec scatter couleur entre -1 et 0 m
+        #voir plotGauss?py pour avoir une idée des coefficients std
         for x,y,z in zip(X,Y,Z):
             if xBoat > 0 and yBoat > 0 and xBoat < 10.2 and yBoat < 5.2:
                 std = 0.2
@@ -115,7 +116,7 @@ while alive.is_set():
                 g = 2.5*std*scipy.stats.norm.pdf(z,0,std)
                 b = 2.5*std*scipy.stats.norm.pdf(z,-1,std)
             
-                col = np.array([[r,g,b]]) #blue if z = -3, green if z = -1.5, red if z = -0
+                col = np.array([[r,g,b]]) #blue if z = -1, green if z = 0, red if z = -0.5
                 plt.figure(0)
                 plt.scatter(y, x, marker = 'o', c = col)
                 
@@ -158,7 +159,7 @@ while alive.is_set():
             nbPlot = 0
             print("-------------Update Bathymetrie------------")
             
-            pas = 1/10
+            pas = 1/5
             ZCont = -1*np.ones((int(10.2/pas), int(5.2/pas)))
             XCont = np.linspace(0,5.2,np.shape(ZCont)[1])
             YCont = np.linspace(0,10.2,np.shape(ZCont)[0])               

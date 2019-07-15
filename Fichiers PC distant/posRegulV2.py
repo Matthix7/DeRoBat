@@ -18,10 +18,9 @@ distAr0Ar10 = 5.2 #distance entre l'aruco 0 et 10 (axe des Y)
 
 ############# #Check adresse avec IPUtility #################################
 #############################################################################
-adressCam2 = 'http://root:1234@169.254.236.203/mjpg/video.mjpg'   
-adressCam3 = 'http://root:1234@169.254.206.22/mjpg/video.mjpg'   
-adressCam1 = 'http://root:1234@169.254.15.151/mjpg/video.mjpg'    
-
+adressCam2 = 'http://root:1234@169.254.236.203/mjpg/video.mjpg'
+adressCam3 = 'http://root:1234@169.254.206.22/mjpg/video.mjpg'
+adressCam1 = 'http://root:1234@169.254.15.151/mjpg/video.mjpg'
 #############################################################################
 #############################################################################
 

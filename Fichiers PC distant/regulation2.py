@@ -124,7 +124,7 @@ def getCommande(X, a, b, vTarget, commande_precedente):
         else: 
             commande[0,0] = angle_max
    
-    commande[1,0] = 0.38
+    commande[1,0] = 0.6
     #commande = commande_precedente + dt*dU
     commande[0, 0] = maxFloat(-angle_max, minFloat(commande[0,0] , angle_max))
     commande[1, 0] = maxFloat(-vmax, minFloat(commande[1,0] , vmax))
