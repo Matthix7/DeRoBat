@@ -26,6 +26,3 @@ Mot de Passe: derobat
 ## En fonctionnement
 Sur la chaîne YouTube de notre professeur de Robotique: https://www.youtube.com/watch?v=PU-aVa9GJ1c
 ![alt text](https://github.com/Matthix7/DeRoBat/blob/master/Visuels/Bateau/Fischkutter/Screenshot_20190703-202959.png "En fonctionnement")
-
-## Overview
-![alt text](https://github.com/Matthix7/DeRoBat/blob/master/poster.pdf "Poster de présentation")
