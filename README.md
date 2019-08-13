@@ -14,7 +14,7 @@ Programmes permettant de faire fonctionner le démonstrateur de robot bathymétr
 	4.2) Se connecter via bureau à distance (conseillé) ou ssh à la Raspberry.   
 	adresse IP: 10.3.141.1  
 	user: pi  
-	Mot de Passe: derobat  
+	Mot de Passe: derobat
 	4.3) Une fois connecté à une session de la Raspberry, ouvrir un terminal dans /Documents/DeRoBat/Sonar et un autre dans /Documents/DeRoBat/Communication.
 	4.4) Dans le terminal Sonar, lancer le programme testDevices (`./testDevices`).
 	4.5) Dans le terminal Communication, lancer le programme Client (`python3 Client.py`). Ne pas oublier le *python3*.
