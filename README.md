@@ -8,6 +8,7 @@ Programmes permettant de faire fonctionner le démonstrateur de robot bathymétr
 2) Attendre jusqu'à l'apparition du réseau Wifi raspi-DeRoBat. (environ 2 min)  
 3) S'y connecter (MdP: ENSTA_MerXXL)
 4) Lancement du programme: (2 choix possibles)
+
 	4.0) Choix 1:
 	4.1) Lancer l'exécution du programme `Server.py` sur une session du PC distant.
 	4.2) Se connecter via bureau à distance (conseillé) ou ssh à la Raspberry.   
